@@ -1,0 +1,438 @@
+{
+  "name": "n8n_python_explorer_1",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1770066961,
+          "mode": "list",
+          "cachedResultName": "form_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1770066961"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        96
+      ],
+      "id": "a1dcb756-c74a-4bc0-b480-99db5b058dcd",
+      "name": "New order in sheets",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "3Ljkvy4HDHvWRVVs",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 530864266,
+          "mode": "list",
+          "cachedResultName": "order_counters",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=530864266"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "81266189-1747-4ada-bf92-e104e853fc79",
+      "name": "order_counters",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c72eed7-1fe6-4c91-aa2d-72908f20e11a",
+              "name": "created_at",
+              "value": "={{ $json.Timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "9c641686-92d4-4e8e-940f-41d7653e0e07",
+              "name": "order_id",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a421e22c-50e3-44ec-a9cb-f1ed08a4bf05",
+              "name": "customer_name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "0875ec4f-3030-4564-a38f-89cda102b85b",
+              "name": "college_code",
+              "value": "={{ $json.College.split(\" - \")[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "4af7209b-458b-45de-9f53-42ef7edc40a4",
+              "name": "whatsapp_number",
+              "value": "={{ $json['Mobile Number -  ( WhatsApp )'] }}",
+              "type": "number"
+            },
+            {
+              "id": "b8bd8413-d2fd-4efc-a17b-86c0de221a90",
+              "name": "college_name",
+              "value": "={{ $json.College.split(\" - \").slice(1).join(\" - \").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e734c285-97f8-41f4-a7b7-27475da92ef1",
+              "name": "delivery_date",
+              "value": "={{ $json['Delivery Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b8961b14-931a-4673-a15d-f7d2c721ab63",
+              "name": "delivery_slot",
+              "value": "={{ $json['Choose Delivery Slot '] }}",
+              "type": "string"
+            },
+            {
+              "id": "678f81b2-9ba6-43a1-96b0-31443f75df4a",
+              "name": "delivery_batch_id",
+              "value": "={{  $json.College.split(\" - \")[0].trim()  + \"-\"  + new Date($json[\"Delivery Date\"]).toLocaleDateString(\"en-GB\").replace(/\\//g, \"\")  + \"-\"  + ({      \"Morning\": \"01\",      \"Afternoon\": \"02\"    }[$json[\"Choose Delivery Slot \"]] || \"99\")}}",
+              "type": "string"
+            },
+            {
+              "id": "5af972a1-4d6c-4585-aaaa-2a79f76aeacf",
+              "name": "late_night_order",
+              "value": "={{\n(() => {\n\n  const raw = String($json.Timestamp || \"\");\n  if (!raw) return \"NO\";\n\n  // Match: 12/28/2025 3:20:49\n  const m = raw.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\s+(\\d{1,2}):(\\d{2}):(\\d{2})$/);\n\n  if (!m) return \"NO\";\n\n  const hour = Number(m[4]);\n\n  // Night window: 10PM → 6AM\n  return (hour >= 22 || hour < 6) ? \"YES\" : \"NO\";\n\n})()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "1c222fb4-e76b-4374-9d88-47fad6de3119",
+              "name": "pdf_file_url",
+              "value": "={{ $json.PDF }}",
+              "type": "string"
+            },
+            {
+              "id": "a48d4c1d-186b-4514-b67b-505a9736d846",
+              "name": "binding_type",
+              "value": "={{ $json['Binding specification'] }}",
+              "type": "string"
+            },
+            {
+              "id": "299c44e7-f644-4948-8b56-ddd797d1c7cd",
+              "name": "copies",
+              "value": "={{ $json['Number of copies'] }}",
+              "type": "number"
+            },
+            {
+              "id": "463a4fbe-6b9a-4de7-9377-54658804e794",
+              "name": "color_pages_list",
+              "value": "={{ $json['Color Pages'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9bfcb6bf-2f0b-405d-8bd2-27caa222d5ff",
+              "name": "color_pages_count_per_copy",
+              "value": "={{ \n(() => {\n\n  const val = $json[\"Color Pages\"];\n\n  // Handle empty/null/0\n  if (\n    val === null ||\n    val === undefined ||\n    val.toString().trim() === \"\" ||\n    val.toString().trim() === \"0\"\n  ) {\n    return 0;\n  }\n\n  return val\n    .toString()\n    .split(\",\")\n    .map(v => v.trim())\n    .filter(v => v !== \"\")\n    .length;\n\n})()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "cd6c4677-9dfb-44d7-bdd6-b5532d6648b4",
+              "name": "special_pages",
+              "value": "={{ $json['Special Pages '] }}",
+              "type": "string"
+            },
+            {
+              "id": "85c7b0a3-7b76-4bdd-a3ac-8e4d9cbe14f1",
+              "name": "special_instructions",
+              "value": "={{ $json['Special Instructions for Print Operator'] }}",
+              "type": "string"
+            },
+            {
+              "id": "1cc93317-dfbb-44bc-af03-218f63ad2211",
+              "name": "whatsapp_sent",
+              "value": "NO",
+              "type": "string"
+            },
+            {
+              "id": "059e47f7-80c2-4c39-8c2c-839a31d8b5a6",
+              "name": "notion_synced",
+              "value": "NO",
+              "type": "string"
+            },
+            {
+              "id": "afaeb676-041a-4571-af4e-6e5a6c0f0b53",
+              "name": "order_status",
+              "value": "NEW",
+              "type": "string"
+            },
+            {
+              "id": "72d27092-39e0-4a6d-8307-7a69e58d5bcd",
+              "name": "payment_status",
+              "value": "pending",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        96
+      ],
+      "id": "1d9b34aa-9e27-40d2-ac91-de07ba84987b",
+      "name": "mapping fields to execution terminology"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "rows = _input.all()\n\ncleaned = []\n\nfor item in rows:\n    data = item.json or {}\n\n    college_code = data.get(\"college_code\")\n    last_number = data.get(\"last_order_number\")\n\n    # strict validation\n    if not college_code or last_number is None:\n        continue\n\n    cleaned.append({\n        \"json\": {\n            \"college_code\": str(college_code).strip(),\n            \"last_order_number\": int(last_number)\n        }\n    })\n\nreturn cleaned"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "d91c81ba-8444-49c6-ba5c-b01b63432fee",
+      "name": "format order_counters"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from datetime import datetime\n\ndata = _input.first().json\n\norders = data.get(\"orders\", [])\ncounter_rows = data.get(\"order_counters\", [])\n\n# -----------------------------\n# BUILD BASE COUNTERS\n# -----------------------------\nbase_counter = {\n    str(row.get(\"college_code\", \"\")).strip():\n    int(row.get(\"last_order_number\"))\n    for row in counter_rows\n    if row.get(\"college_code\")\n    and row.get(\"last_order_number\") is not None\n}\n\n# -----------------------------\n# PROCESS ORDERS\n# -----------------------------\nworking_counter = base_counter.copy()\n\nprocessed_orders = []\n\nfor order in orders:\n\n    code = str(order.get(\"college_code\", \"\")).strip()\n\n    if not code:\n        continue\n\n    # Increment counter\n    working_counter[code] = working_counter.get(code, 0) + 1\n\n    # Generate order ID\n    order[\"order_id\"] = f\"{code}-{working_counter[code]:03d}\"\n\n    processed_orders.append(order)\n\n# -----------------------------\n# GENERATE BATCH ID\n# -----------------------------\ntimestamp = datetime.now().strftime(\"%Y%m%d-%H%M%S\")\n\nbatch_id = f\"EXEC-{timestamp}-IST\"\n\n# -----------------------------\n# RETURN RESULT\n# -----------------------------\nreturn [{\n    \"json\": {\n        \"batch_id\": batch_id,\n        \"total_orders\": len(processed_orders),\n        \"base_counters\": base_counter,\n        \"updated_counters\": working_counter,\n        \"orders\": processed_orders\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        96
+      ],
+      "id": "a7824f01-f9d1-47ee-83be-43f94c9f872b",
+      "name": "assign order_id",
+      "executeOnce": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        96
+      ],
+      "id": "fb94f802-bf39-4731-bff0-5df5c5283adf",
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "rows = _input.all()\n\norder_counters = []\norders = []\n\nfor item in rows:\n\n    data = item.json or {}\n\n    # Counter rows\n    if \"last_order_number\" in data:\n        order_counters.append(data)\n\n    # Actual order rows\n    else:\n        orders.append(data)\n\nreturn [{\n    \"json\": {\n        \"order_counters\": order_counters,\n        \"orders\": orders\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "564da92e-63e6-4749-ba26-5b8f46f090ed",
+      "name": "json_formatting"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "rows = _input.all()\n\ndef parse_special(s):\n    s = (s or \"\").lower()\n\n    return {\n        \"transparent\": \"transparent front sheet\" in s,\n        \"glossy\": \"glossy front page print\" in s,\n        \"bonafide\": \"bonafied in bond paper\" in s,\n        \"full_report\": \"complete report in bond paper\" in s,\n        \"none\": \"none\" in s\n    }\n\noutput = []\n\nfor item in rows:\n    d = item.json\n\n    # -------------------------\n    # SAFE FIELD READS\n    # -------------------------\n    special = d.get(\"special_pages\", \"\")\n    original_instruction = d.get(\"special_instructions\", \"\") or \"\"\n\n    flags = parse_special(special)\n\n    # -------------------------\n    # SET FLAGS\n    # -------------------------\n    d[\"has_transparent_sheet\"] = \"YES\" if flags[\"transparent\"] else \"NO\"\n    d[\"glossy_front_page_count_per_copy\"] = \"YES\" if flags[\"glossy\"] else \"NO\"\n    d[\"bonafied_page_count_per_copy\"] = \"YES\" if flags[\"bonafide\"] else \"NO\"\n    d[\"full_report_in_bond_paper\"] = \"YES\" if flags[\"full_report\"] else \"NO\"\n\n    # -------------------------\n    # INSTRUCTION ISSUE RULE\n    # -------------------------\n    conflict = flags[\"none\"] and (\n        flags[\"transparent\"] or\n        flags[\"glossy\"] or\n        flags[\"bonafide\"] or\n        flags[\"full_report\"]\n    )\n\n    if conflict:\n        if original_instruction.strip():\n            d[\"special_instructions\"] = \"INSTRUCTION ISSUE - \" + original_instruction\n        else:\n            d[\"special_instructions\"] = \"INSTRUCTION ISSUE\"\n\n    output.append({\"json\": d})\n\nreturn output"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        192
+      ],
+      "id": "79e02777-797c-466a-b22f-8ba5b5d927ce",
+      "name": "order_business_rules"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PEaLBod7zB4ATccM",
+          "mode": "list",
+          "cachedResultName": "pdf_processing_engine"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        192
+      ],
+      "id": "809d7dc0-1e75-4117-a032-6ab5c72d27fc",
+      "name": "Call 'pdf_processing_engine'",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 100
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New order in sheets": {
+      "main": [
+        [
+          {
+            "node": "mapping fields to execution terminology",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order_counters": {
+      "main": [
+        [
+          {
+            "node": "format order_counters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapping fields to execution terminology": {
+      "main": [
+        [
+          {
+            "node": "order_counters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "order_business_rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format order_counters": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "assign order_id": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "json_formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "json_formatting": {
+      "main": [
+        [
+          {
+            "node": "assign order_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order_business_rules": {
+      "main": [
+        [
+          {
+            "node": "Call 'pdf_processing_engine'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'pdf_processing_engine'": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94797556-7489-4cf1-b3e6-538d4b3bf78f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
+  },
+  "id": "wdtnhTxofmN2neIs",
+  "tags": [
+    {
+      "createdAt": "2026-05-25T15:32:07.705Z",
+      "updatedAt": "2026-05-25T15:32:07.705Z",
+      "id": "nD2hUj6AssNB7Las",
+      "name": "learning"
+    }
+  ]
+}

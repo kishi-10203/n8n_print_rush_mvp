@@ -1,0 +1,93 @@
+{
+  "name": "pdf_processing_engine",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "269e3884-b1e4-424f-9a46-48a7cd068ca2",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.pdf_file_url.match(/id=([^&]+)/)[1] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e5fe405c-f39e-4f62-9127-64774b209803",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "99anYy0tMjUVjQJr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from PyPDF2 import PdfReader\nimport io\n\nitem = _input.first().json\n\nresult = item\n\ntry:\n    pdf_binary = _input.first().binary.get(\"pdf\")\n\n    if not pdf_binary:\n        result[\"pdf_valid\"] = \"NO\"\n        result[\"total_pages_per_copy\"] = 0\n    else:\n        pdf_bytes = pdf_binary[\"data\"]\n        reader = PdfReader(io.BytesIO(pdf_bytes))\n\n        result[\"pdf_valid\"] = \"YES\"\n        result[\"total_pages_per_copy\"] = len(reader.pages)\n\nexcept Exception:\n    result[\"pdf_valid\"] = \"NO\"\n    result[\"total_pages_per_copy\"] = 0\n\nreturn [{\"json\": result}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "fcac6a6c-0e42-4581-82a9-06364dcb101b",
+      "name": "page_counter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "page_counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c3305747-0f94-4dd4-955f-65e33c307220",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
+  },
+  "id": "PEaLBod7zB4ATccM",
+  "tags": []
+}
