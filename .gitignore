@@ -1,0 +1,52 @@
+# =========================
+# ENV FILES (SECRETS)
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# DOCKER
+# =========================
+docker-compose.override.yml
+
+# =========================
+# N8N DATA
+# =========================
+n8n_data/
+*.sqlite
+*.db
+*.log
+
+# =========================
+# WAHA DATA / MEDIA
+# =========================
+waha_sessions/
+waha_media/
+
+# =========================
+# NODE / SYSTEM FILES
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE / EDITOR
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# BACKUPS
+# =========================
+*.bak
+*.backup
+*.old

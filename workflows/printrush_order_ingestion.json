@@ -1,0 +1,1836 @@
+{
+  "name": "printrush_order_ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -656
+      ],
+      "id": "8552637a-03c1-42bf-b174-af0c3a7b6373",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c72eed7-1fe6-4c91-aa2d-72908f20e11a",
+              "name": "created_at",
+              "value": "={{ $json.Timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "9c641686-92d4-4e8e-940f-41d7653e0e07",
+              "name": "order_id",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a421e22c-50e3-44ec-a9cb-f1ed08a4bf05",
+              "name": "customer_name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "0875ec4f-3030-4564-a38f-89cda102b85b",
+              "name": "college_code",
+              "value": "={{ $json.College.split(\" - \")[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "4af7209b-458b-45de-9f53-42ef7edc40a4",
+              "name": "whatsapp_number",
+              "value": "={{ $json['Mobile Number -  ( WhatsApp )'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b8bd8413-d2fd-4efc-a17b-86c0de221a90",
+              "name": "college_name",
+              "value": "={{ $json.College.split(\" - \").slice(1).join(\" - \").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e734c285-97f8-41f4-a7b7-27475da92ef1",
+              "name": "delivery_date",
+              "value": "={{ $json['Delivery Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b8961b14-931a-4673-a15d-f7d2c721ab63",
+              "name": "delivery_slot",
+              "value": "={{ $json['Choose Delivery Slot '] }}",
+              "type": "string"
+            },
+            {
+              "id": "678f81b2-9ba6-43a1-96b0-31443f75df4a",
+              "name": "delivery_batch_id",
+              "value": "={{  $json.College.split(\" - \")[0].trim()  + \"-\"  + new Date($json[\"Delivery Date\"]).toLocaleDateString(\"en-GB\").replace(/\\//g, \"\")  + \"-\"  + ({      \"Morning\": \"01\",      \"Afternoon\": \"02\"    }[$json[\"Choose Delivery Slot \"]] || \"99\")}}",
+              "type": "string"
+            },
+            {
+              "id": "5af972a1-4d6c-4585-aaaa-2a79f76aeacf",
+              "name": "late_night_order",
+              "value": "={{\n(() => {\n\n  const raw = String($json.Timestamp || \"\");\n  if (!raw) return \"NO\";\n\n  // Match: 12/28/2025 3:20:49\n  const m = raw.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\s+(\\d{1,2}):(\\d{2}):(\\d{2})$/);\n\n  if (!m) return \"NO\";\n\n  const hour = Number(m[4]);\n\n  // Night window: 10PM → 6AM\n  return (hour >= 22 || hour < 6) ? \"YES\" : \"NO\";\n\n})()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "1c222fb4-e76b-4374-9d88-47fad6de3119",
+              "name": "pdf_file_url",
+              "value": "={{ $json.PDF }}",
+              "type": "string"
+            },
+            {
+              "id": "a48d4c1d-186b-4514-b67b-505a9736d846",
+              "name": "binding_type",
+              "value": "={{ $json[\"Binding specification\"].toUpperCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "299c44e7-f644-4948-8b56-ddd797d1c7cd",
+              "name": "copies",
+              "value": "={{ $json['Number of copies'] }}",
+              "type": "number"
+            },
+            {
+              "id": "463a4fbe-6b9a-4de7-9377-54658804e794",
+              "name": "color_pages_list",
+              "value": "={{ $json['Color Pages'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9bfcb6bf-2f0b-405d-8bd2-27caa222d5ff",
+              "name": "color_pages_count_per_copy",
+              "value": "={{ \n(() => {\n\n  const val = $json[\"Color Pages\"];\n\n  // Handle empty/null/0\n  if (\n    val === null ||\n    val === undefined ||\n    val.toString().trim() === \"\" ||\n    val.toString().trim() === \"0\"\n  ) {\n    return 0;\n  }\n\n  return val\n    .toString()\n    .split(\",\")\n    .map(v => v.trim())\n    .filter(v => v !== \"\")\n    .length;\n\n})()\n}}",
+              "type": "number"
+            },
+            {
+              "id": "cd6c4677-9dfb-44d7-bdd6-b5532d6648b4",
+              "name": "special_pages",
+              "value": "={{ $json[\"Add On's\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "85c7b0a3-7b76-4bdd-a3ac-8e4d9cbe14f1",
+              "name": "special_instructions",
+              "value": "={{ $json['Special Instructions for Print Operator'] }}",
+              "type": "string"
+            },
+            {
+              "id": "1cc93317-dfbb-44bc-af03-218f63ad2211",
+              "name": "whatsapp_sent",
+              "value": "NO",
+              "type": "string"
+            },
+            {
+              "id": "059e47f7-80c2-4c39-8c2c-839a31d8b5a6",
+              "name": "notion_synced",
+              "value": "NO",
+              "type": "string"
+            },
+            {
+              "id": "afaeb676-041a-4571-af4e-6e5a6c0f0b53",
+              "name": "order_status",
+              "value": "NEW",
+              "type": "string"
+            },
+            {
+              "id": "72d27092-39e0-4a6d-8307-7a69e58d5bcd",
+              "name": "payment_status",
+              "value": "PENDING",
+              "type": "string"
+            },
+            {
+              "id": "4173438d-1e40-448d-b888-52a524150cfc",
+              "name": "form_response_row_number",
+              "value": "={{ $json.row_number }}",
+              "type": "number"
+            },
+            {
+              "id": "5627d3b9-f41a-42b4-9058-3604183e61df",
+              "name": "print_type",
+              "value": "={{ $json[\"Print Type\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -560
+      ],
+      "id": "c1d5a1d3-3aa4-4921-8fc6-16e3289e5254",
+      "name": "mapping fields to execution terminology"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1276047496,
+          "mode": "list",
+          "cachedResultName": "last_batch_markers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1276047496"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -656
+      ],
+      "id": "375eacd7-15ab-4788-baca-4c5bddf426a3",
+      "name": "fetch last_batch_markers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "rows = _input.all()\n\ndef parse_special(s):\n    s = (s or \"\").lower()\n\n    return {\n        \"transparent\": \"transparent front sheet\" in s,\n        \"glossy\": \"glossy front page print\" in s,\n        \"bonafide\": \"bonafied in bond paper\" in s,\n        \"full_report\": \"complete report in bond paper\" in s,\n        \"none\": \"none\" in s\n    }\n\noutput = []\n\nfor item in rows:\n    d = item.json\n\n    # -------------------------\n    # SAFE FIELD READS\n    # -------------------------\n    special = d.get(\"special_pages\", \"\")\n    original_instruction = d.get(\"special_instructions\", \"\") or \"\"\n\n    flags = parse_special(special)\n\n    # -------------------------\n    # SET FLAGS\n    # -------------------------\n    d[\"has_transparent_sheet\"] = \"YES\" if flags[\"transparent\"] else \"NO\"\n    d[\"glossy_front_page\"] = \"YES\" if flags[\"glossy\"] else \"NO\"\n    d[\"bonafied_in_bond_paper\"] = \"YES\" if flags[\"bonafide\"] else \"NO\"\n    d[\"full_report_in_bond_paper\"] = \"YES\" if flags[\"full_report\"] else \"NO\"\n\n    # -------------------------\n    # INSTRUCTION ISSUE RULE\n    # -------------------------\n    conflict = flags[\"none\"] and (\n        flags[\"transparent\"] or\n        flags[\"glossy\"] or\n        flags[\"bonafide\"] or\n        flags[\"full_report\"]\n    )\n\n    if conflict:\n        if original_instruction.strip():\n            d[\"special_instructions\"] = \"INSTRUCTION ISSUE - \" + original_instruction\n        else:\n            d[\"special_instructions\"] = \"INSTRUCTION ISSUE\"\n\n    output.append({\"json\": d})\n\nreturn output"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -656
+      ],
+      "id": "25593121-13b7-4165-9ffe-0e086b11e6e8",
+      "name": "order_business_rules"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "python",
+        "pythonCode": "# PRICING CONSTANTS\n\nBINDING_COST = {\n    \"SOFT BINDING\": 40,\n    \"SPIRAL BINDING\": 60,\n    \"NONE\": 0\n}\n\nCOLOR_RATE_NORMAL = 10\nMONO_RATE_NORMAL = 2.5\n\nCOLOR_RATE_BOND = 20\nMONO_RATE_BOND = 15\n\nGLOSS_RATE = 20\n\nLATE_NIGHT_FEE = 25\n\n\ndef is_yes(val):\n    return str(val).strip().upper() == \"YES\"\n\n\n# Preserve all incoming fields\no = {**item[\"json\"]}\n\ncopies = int(o.get(\"copies\") or 1)\n\n# Options\nis_bond = is_yes(o.get(\"full_report_in_bond_paper\"))\nis_gloss = is_yes(o.get(\"glossy_front_page\"))\nis_late_night = is_yes(o.get(\"late_night_order\"))\n\n# Rates\ncolor_rate = COLOR_RATE_BOND if is_bond else COLOR_RATE_NORMAL\nmono_rate = MONO_RATE_BOND if is_bond else MONO_RATE_NORMAL\n\n# Page counts\ntotal_pages = int(o.get(\"total_pages_per_copy\") or 0)\ncolor_pages = int(o.get(\"color_pages_count_per_copy\") or 0)\nmono_pages = max(total_pages - color_pages, 0)\n\n# Cost components\nbinding_cost = BINDING_COST.get(\n    str(o.get(\"binding_type\", \"NONE\")).strip().upper(),\n    0\n)\n\ncolor_cost = color_pages * color_rate\nmono_cost = mono_pages * mono_rate\ngloss_cost = GLOSS_RATE if is_gloss else 0\n\n# Per-copy pricing\nper_copy_total = (\n    binding_cost +\n    gloss_cost +\n    color_cost +\n    mono_cost\n)\n\n# Order pricing\nlate_fee = LATE_NIGHT_FEE if is_late_night else 0\n\nsubtotal = per_copy_total * copies\n\norder_total = subtotal + late_fee\n\n# Add calculated fields without removing originals\no[\"binding_cost\"] = round(binding_cost, 2)\n\no[\"color_rate\"] = color_rate\no[\"mono_rate\"] = mono_rate\n\no[\"color_pages\"] = color_pages\no[\"mono_pages\"] = mono_pages\n\no[\"color_cost_per_copy\"] = round(color_cost, 2)\no[\"mono_cost_per_copy\"] = round(mono_cost, 2)\n\no[\"gloss_cost_per_copy\"] = round(gloss_cost, 2)\n\no[\"per_copy_total\"] = round(per_copy_total, 2)\n\no[\"copies\"] = copies\n\no[\"subtotal\"] = round(subtotal, 2)\no[\"late_fee\"] = round(late_fee, 2)\n\no[\"order_total\"] = round(order_total, 2)\n\nreturn {\"json\": o}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        -656
+      ],
+      "id": "6d257578-752b-4353-a4dc-c57802766ee9",
+      "name": "order_pricing",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from datetime import datetime\n\ndata = _input.all()\n\n# Existing counters per college\nbase_counter = _('format_order_counters').first().json.to_py()\nworking_counter = base_counter.copy()\n\n# -----------------------------\n# GENERATE BATCH ID\n# -----------------------------\ntimestamp = datetime.now().strftime(\"%Y%m%d-%H%M%S\")\nbatch_id = f\"EXEC-{timestamp}-IST\"\n\n\nprocessed_orders = []\n\nfor item in data:\n\n    order = item.json or {}\n    code = str(order.get(\"college_code\", \"\")).strip()\n\n    if not code:\n        continue\n\n    # Increment counter\n    working_counter[code] = working_counter.get(code, 0) + 1\n    # Assign order ID\n    order[\"order_id\"] = f\"{code}-{working_counter[code]:03d}\"\n  \n    processed_orders.append(order)\n\n# Final output\nreturn [{\n    \"json\": {\n        \"batch_id\": batch_id,\n        \"total_orders\": len(processed_orders),\n        \"base_counters\": base_counter,\n        \"updated_counters\": working_counter,\n        \"orders\": processed_orders\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -656
+      ],
+      "id": "ffcd797e-cd4b-4b0d-9b5d-d3f4a1d6a957",
+      "name": "assign_order_id",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const batch_metadata = $(\"assign_order_id\").first().json;\n\nconst updated_counters = batch_metadata.updated_counters || {};\nconst batch_id = batch_metadata.batch_id;\n\nconst updated_at = new Date().toISOString();\n\nreturn Object.entries(updated_counters).map(\n  ([college_code, last_order_number]) => ({\n    json: {\n      college_code,\n      last_order_number,\n      updated_at,\n      batch_id,\n    },\n  })\n);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        -848
+      ],
+      "id": "42869d60-90b8-44f5-a38a-a66bf13ba42d",
+      "name": "format_updated_counters"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "rows = _input.all()\n\ncollege_counters = {}\n\nfor item in rows:\n\n    data = item.json or {}\n\n    college_code = data.get(\"college_code\")\n    last_number = data.get(\"last_order_number\")\n\n    # strict validation\n    if not college_code or last_number is None:\n        continue\n\n    code = str(college_code).strip()\n\n    # store latest value per college\n    college_counters[code] = int(last_number)\n\nreturn [{\n    \"json\": college_counters\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -752
+      ],
+      "id": "1dd161fc-0131-422e-999c-a39202890b9f",
+      "name": "format_order_counters"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2d3ceca9-c821-80c9-94d6-f0ff053c1109",
+          "mode": "list",
+          "cachedResultName": "PrintRush Orders",
+          "cachedResultUrl": "https://www.notion.so/2d3ceca9c82180c994d6f0ff053c1109"
+        },
+        "title": "={{ $json.order_id }}",
+        "simple": false,
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "created_at|date",
+              "includeTime": false,
+              "date": "={{ $json.created_at }}"
+            },
+            {
+              "key": "customer_name|rich_text",
+              "textContent": "={{ $json.customer_name }}"
+            },
+            {
+              "key": "college_code|select",
+              "selectValue": "={{ $json.college_code }}"
+            },
+            {
+              "key": "whatsapp_number|phone_number",
+              "phoneValue": "={{ $json.whatsapp_number }}"
+            },
+            {
+              "key": "college_name|rich_text",
+              "textContent": "={{ $json.college_name }}"
+            },
+            {
+              "key": "delivery_date|date",
+              "includeTime": false,
+              "date": "={{ $json.delivery_date }}"
+            },
+            {
+              "key": "delivery_slot|select",
+              "selectValue": "={{ $json.delivery_slot.toUpperCase()}}"
+            },
+            {
+              "key": "delivery_batch_id|rich_text",
+              "textContent": "={{ $json.delivery_batch_id }}"
+            },
+            {
+              "key": "late_night_order|select",
+              "selectValue": "={{ $json.late_night_order }}"
+            },
+            {
+              "key": "pdf_file_url|url",
+              "urlValue": "={{ $json.pdf_file_url }}"
+            },
+            {
+              "key": "binding_type|select",
+              "selectValue": "={{ $json.binding_type }}"
+            },
+            {
+              "key": "copies|number",
+              "numberValue": "={{ $json.copies }}"
+            },
+            {
+              "key": "color_pages_list|rich_text",
+              "textContent": "={{ $json.color_pages_list }}"
+            },
+            {
+              "key": "total_pages_per_copy|number",
+              "numberValue": "={{ $json.total_pages_per_copy }}"
+            },
+            {
+              "key": "color_pages_count_per_copy|number",
+              "numberValue": "={{ $json.color_pages_count_per_copy }}"
+            },
+            {
+              "key": "monochrome_pages_count_per_copy|number",
+              "numberValue": "={{ $json.monochrome_pages_count_per_copy }}"
+            },
+            {
+              "key": "special_instructions|rich_text",
+              "textContent": "={{ $json.special_instructions }}"
+            },
+            {
+              "key": "whatsapp_sent|select",
+              "selectValue": "={{ $json.whatsapp_sent }}"
+            },
+            {
+              "key": "order_status|select",
+              "selectValue": "={{ $json.order_status }}"
+            },
+            {
+              "key": "payment_status|select",
+              "selectValue": "={{ $json.payment_status }}"
+            },
+            {
+              "key": "has_transparent_front_sheet|select",
+              "selectValue": "={{ $json.has_transparent_sheet }}"
+            },
+            {
+              "key": "glossy_front_page|select",
+              "selectValue": "={{ $json.glossy_front_page }}"
+            },
+            {
+              "key": "bonafied_page_in_bond_paper|select",
+              "selectValue": "={{ $json.bonafied_page_in_bond_paper }}"
+            },
+            {
+              "key": "batch_id|rich_text",
+              "textContent": "={{ $json.batch_id }}"
+            },
+            {
+              "key": "print_type|select",
+              "selectValue": "={{ $json.print_type }}"
+            },
+            {
+              "key": "form_response_row_number|number",
+              "numberValue": "={{ $json.form_response_row_number }}"
+            },
+            {
+              "key": "per_copy_total|number",
+              "numberValue": "={{ $json.per_copy_total }}"
+            },
+            {
+              "key": "order_total|number",
+              "numberValue": "={{ $json.order_total }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        -656
+      ],
+      "id": "262745fb-cb7a-42ca-a10b-c7a5545d4107",
+      "name": "create_orders_notion_page",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "notionApi": {
+          "id": "7VwtTjmlY99rvBLT",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 530864266,
+          "mode": "list",
+          "cachedResultName": "order_counters",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=530864266"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "college_code": "HITS",
+            "last_order_number": "={{ $('order_pricing').item.json.updated_counters.HITS }}"
+          },
+          "matchingColumns": [
+            "college_code"
+          ],
+          "schema": [
+            {
+              "id": "college_code",
+              "displayName": "college_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_order_number",
+              "displayName": "last_order_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        -848
+      ],
+      "id": "41e8e46f-e6f8-4ae5-8f35-5911e2845ac3",
+      "name": "update_order_counters",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1276047496,
+          "mode": "list",
+          "cachedResultName": "last_batch_markers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1276047496"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "last_processed_form_response_row": "={{ $json.last_processed_form_response_row }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "last_processed_form_response_row",
+              "displayName": "last_processed_form_response_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_notion_synced_row",
+              "displayName": "last_notion_synced_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_whatsapp_notification_sent_row",
+              "displayName": "last_whatsapp_notification_sent_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_processed_row",
+              "displayName": "last_processed_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        -656
+      ],
+      "id": "90b4afad-8040-4f28-941e-ff6d2ac769a5",
+      "name": "update_batch_markers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 14100729,
+          "mode": "list",
+          "cachedResultName": "processed_orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=14100729"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "college_code": "={{ $json.college_code }}",
+            "whatsapp_number": "={{ $json.whatsapp_number }}",
+            "college_name": "={{ $json.college_name }}",
+            "delivery_slot": "={{ $json.delivery_slot }}",
+            "delivery_batch_id": "={{ $json.delivery_batch_id }}",
+            "late_night_order": "={{ $json.late_night_order }}",
+            "pdf_file_url": "={{ $json.pdf_file_url }}",
+            "binding_type": "={{ $json.binding_type }}",
+            "total_pages_per_copy": "={{ $json.total_pages_per_copy }}",
+            "copies": "={{ $json.copies }}",
+            "color_pages_list": "={{ $json.color_pages_list }}",
+            "color_pages_count_per_copy": "={{ $json.color_pages_count_per_copy }}",
+            "monochrome_pages_count_per_copy": "={{ $json.monochrome_pages_count_per_copy }}",
+            "full_report_in_bond_paper": "={{ $json.full_report_in_bond_paper }}",
+            "per_copy_total": "={{ $json.per_copy_total }}",
+            "special_instructions": "={{ $json.special_instructions }}",
+            "whatsapp_sent": "={{ $json.whatsapp_sent }}",
+            "order_status": "={{ $json.order_status }}",
+            "order_total": "={{ $json.order_total }}",
+            "special_pages": "={{ $json.special_pages }}",
+            "created_at": "={{ $json.created_at }}",
+            "form_response_row_number": "={{ $json.form_response_row_number }}",
+            "batch_id": "={{ $json.batch_id }}",
+            "payment_status": "={{ $json.payment_status }}",
+            "has_transparent_front_sheet": "={{ $json.has_transparent_sheet }}",
+            "glossy_front_page": "={{ $json.glossy_front_page }}",
+            "bonafied_page_in_bond_paper": "={{ $json.bonafied_page_in_bond_paper }}",
+            "notion_page_id": "={{ $json.notion_page_id }}",
+            "notion_synced": "YES",
+            "delivery_date": "={{ $json.delivery_date }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notion_page_id",
+              "displayName": "notion_page_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "college_code",
+              "displayName": "college_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "college_name",
+              "displayName": "college_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_date",
+              "displayName": "delivery_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_slot",
+              "displayName": "delivery_slot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_batch_id",
+              "displayName": "delivery_batch_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "late_night_order",
+              "displayName": "late_night_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pdf_file_url",
+              "displayName": "pdf_file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "binding_type",
+              "displayName": "binding_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "copies",
+              "displayName": "copies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "color_pages_list",
+              "displayName": "color_pages_list",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_pages_per_copy",
+              "displayName": "total_pages_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "color_pages_count_per_copy",
+              "displayName": "color_pages_count_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "monochrome_pages_count_per_copy",
+              "displayName": "monochrome_pages_count_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "special_pages",
+              "displayName": "special_pages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "special_instructions",
+              "displayName": "special_instructions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_sent",
+              "displayName": "whatsapp_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notion_synced",
+              "displayName": "notion_synced",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_status",
+              "displayName": "order_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_transparent_front_sheet",
+              "displayName": "has_transparent_front_sheet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "glossy_front_page",
+              "displayName": "glossy_front_page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "bonafied_page_in_bond_paper",
+              "displayName": "bonafied_page_in_bond_paper",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_report_in_bond_paper",
+              "displayName": "full_report_in_bond_paper",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "form_response_row_number",
+              "displayName": "form_response_row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_id",
+              "displayName": "batch_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "per_copy_total",
+              "displayName": "per_copy_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_total",
+              "displayName": "order_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3584,
+        -656
+      ],
+      "id": "d1c082f2-d2c6-4bee-a4f5-d6d578b7a4b3",
+      "name": "save_processed_orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 530864266,
+          "mode": "list",
+          "cachedResultName": "order_counters",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=530864266"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -752
+      ],
+      "id": "a17f3f73-3e79-4e04-8877-cfa59ee13a87",
+      "name": "fetch_order_counters",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1770066961,
+          "mode": "list",
+          "cachedResultName": "form_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1770066961"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "=A{{ $json.last_processed_form_response_row }}:Z"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -560
+      ],
+      "id": "c5bd100e-eac7-4239-bc50-a068b4bf29f4",
+      "name": "fetch_new_orders",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "useDataOfInput": 2
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        -656
+      ],
+      "id": "9edcb7e4-bdda-4285-b9ce-caa216a846bb",
+      "name": "wait_and_merge"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "data = _input.first().json\n\nbatch_id = data.get(\"batch_id\")\norders = data.get(\"orders\", [])\n\nreturn [\n    {\n        \"json\": {\n            **order,\n            \"batch_id\": batch_id\n        }\n    }\n    for order in orders\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -656
+      ],
+      "id": "05457415-68c9-4161-b4c2-50de33a48328",
+      "name": "flatten_order_details"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.pdf_file_url.match(/id=([^&]+)/)[1] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1792,
+        -656
+      ],
+      "id": "c8bd6aa7-32f3-470d-a984-65e59b1f13f8",
+      "name": "download_pdf",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "99anYy0tMjUVjQJr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        -656
+      ],
+      "id": "16533cbc-15a3-4a52-8d74-2669c724b8fc",
+      "name": "extract_pdf"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92fabb3b-d7a4-4c77-97c6-d661f797e26e",
+              "name": "created_at",
+              "value": "={{ $('order_business_rules').item.json.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "22a112ea-a3df-408b-81b4-d72518ed08ca",
+              "name": "order_id",
+              "value": "={{ $('order_business_rules').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "37432568-8d0d-4445-a110-647091e16299",
+              "name": "customer_name",
+              "value": "={{ $('order_business_rules').item.json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "15306b5c-9f44-4ac0-860e-55f0b4183f16",
+              "name": "college_code",
+              "value": "={{ $('order_business_rules').item.json.college_code }}",
+              "type": "string"
+            },
+            {
+              "id": "e56e9216-8e31-4f22-b6ec-8fc8bb12625d",
+              "name": "whatsapp_number",
+              "value": "={{ $('order_business_rules').item.json.whatsapp_number }}",
+              "type": "string"
+            },
+            {
+              "id": "6990df52-1502-41f8-ae61-e8021434e5ae",
+              "name": "college_name",
+              "value": "={{ $('order_business_rules').item.json.college_name }}",
+              "type": "string"
+            },
+            {
+              "id": "e272320f-f4f3-4658-a7ee-404c6c290dc2",
+              "name": "delivery_date",
+              "value": "={{ $('order_business_rules').item.json.delivery_date }}",
+              "type": "string"
+            },
+            {
+              "id": "678ac3f0-5684-4eb4-af44-87f13c2d3c72",
+              "name": "delivery_slot",
+              "value": "={{ $('order_business_rules').item.json.delivery_slot }}",
+              "type": "string"
+            },
+            {
+              "id": "34a7c64d-a9e6-4e80-9449-112977cd44c4",
+              "name": "delivery_batch_id",
+              "value": "={{ $('order_business_rules').item.json.delivery_batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1e364f81-c06a-4d73-8649-eee19c482256",
+              "name": "late_night_order",
+              "value": "={{ $('order_business_rules').item.json.late_night_order }}",
+              "type": "string"
+            },
+            {
+              "id": "05db4c94-51b0-4e11-a231-5797dbf14e7d",
+              "name": "pdf_file_url",
+              "value": "={{ $('order_business_rules').item.json.pdf_file_url }}",
+              "type": "string"
+            },
+            {
+              "id": "b0828b09-e7f9-4716-aad3-edcd505ed57f",
+              "name": "binding_type",
+              "value": "={{ $('order_business_rules').item.json.binding_type }}",
+              "type": "string"
+            },
+            {
+              "id": "ca31a962-d166-414b-b730-c703672dfaea",
+              "name": "copies",
+              "value": "={{ $('order_business_rules').item.json.copies }}",
+              "type": "number"
+            },
+            {
+              "id": "e1b9d5bc-0743-41ed-bb32-3aa2cd8b83ab",
+              "name": "color_pages_list",
+              "value": "={{ $('order_business_rules').item.json.color_pages_list }}",
+              "type": "string"
+            },
+            {
+              "id": "8e74d584-63a3-49e2-9135-528e1da4e5ed",
+              "name": "total_pages_per_copy",
+              "value": "={{ $json.numpages }}",
+              "type": "number"
+            },
+            {
+              "id": "0786eda6-b3ae-43f4-8f3e-60a5ae1da85f",
+              "name": "color_pages_count_per_copy",
+              "value": "={{ $('order_business_rules').item.json.color_pages_count_per_copy }}",
+              "type": "number"
+            },
+            {
+              "id": "52e4cba0-819d-42e2-ad2c-3d61aa830088",
+              "name": "monochrome_pages_count_per_copy",
+              "value": "={{\n  Math.max(\n    0,\n    $json.numpages - Number($('order_business_rules').item.json.color_pages_count_per_copy || 0)\n  )\n}}",
+              "type": "number"
+            },
+            {
+              "id": "f7780112-7906-4600-b496-7aa4b0f50d51",
+              "name": "special_pages",
+              "value": "={{ $('order_business_rules').item.json.special_pages }}",
+              "type": "string"
+            },
+            {
+              "id": "c81fee77-5912-436d-990a-df8c967d6ee2",
+              "name": "special_instructions",
+              "value": "={{ $('order_business_rules').item.json.special_instructions }}",
+              "type": "string"
+            },
+            {
+              "id": "d7aaf145-8a64-403b-8fdd-abee130b7a49",
+              "name": "whatsapp_sent",
+              "value": "={{ $('order_business_rules').item.json.whatsapp_sent }}",
+              "type": "string"
+            },
+            {
+              "id": "40a9a9dd-fe3d-4145-8391-659a2e8d573d",
+              "name": "notion_synced",
+              "value": "={{ $('order_business_rules').item.json.notion_synced }}",
+              "type": "string"
+            },
+            {
+              "id": "100d3850-4698-464b-be87-04e8ae698dbf",
+              "name": "order_status",
+              "value": "={{ $('order_business_rules').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "99fb8ced-5d76-4eb0-9351-9e8592c7e447",
+              "name": "payment_status",
+              "value": "={{ $('order_business_rules').item.json.payment_status }}",
+              "type": "string"
+            },
+            {
+              "id": "f5b689d7-3435-4bcb-a6c5-f6ec5ad97c89",
+              "name": "has_transparent_sheet",
+              "value": "={{ $('order_business_rules').item.json.has_transparent_sheet }}",
+              "type": "string"
+            },
+            {
+              "id": "515c1acb-8c63-4da3-873c-a7ad97ed5690",
+              "name": "glossy_front_page",
+              "value": "={{ $('order_business_rules').item.json.glossy_front_page}}",
+              "type": "string"
+            },
+            {
+              "id": "0497f5b6-f126-4a46-9650-d2b528b32b35",
+              "name": "full_report_in_bond_paper",
+              "value": "={{ $('order_business_rules').item.json.full_report_in_bond_paper }}",
+              "type": "string"
+            },
+            {
+              "id": "ca5cc6a2-312e-41e2-826c-6207f0b277d9",
+              "name": "bonafied_page_in_bond_paper",
+              "value": "={{ $('order_business_rules').item.json.bonafied_in_bond_paper }}",
+              "type": "string"
+            },
+            {
+              "id": "d13dbcdc-927f-4fac-bd57-d52c40da5101",
+              "name": "form_response_row_number",
+              "value": "={{ $('order_business_rules').item.json.form_response_row_number }}",
+              "type": "number"
+            },
+            {
+              "id": "06fe4955-3a68-4d0d-ad09-56e370afcb56",
+              "name": "batch_id",
+              "value": "={{ $('order_business_rules').item.json.batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f7c1e08c-fa8e-46b2-ae1e-7d9235fae69c",
+              "name": "print_type",
+              "value": "={{ $('order_business_rules').item.json.print_type.toUpperCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "eaaf7f19-a457-4f2a-9344-52b5c6b26b77",
+              "name": "notion_page_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        -656
+      ],
+      "id": "3c0056a8-aa5c-4640-a72c-9aaf85ed3a86",
+      "name": "map_order_details"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "numberInputs": 3,
+        "useDataOfInput": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3360,
+        -672
+      ],
+      "id": "ffc78fb5-b689-47a9-8850-a49a5880c210",
+      "name": "wait_and_merge_2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const orders = $(\"order_pricing\").all().map(item => item.json);\nconst lastOrder = orders[orders.length - 1];\n\nreturn [\n  {\n    json: {\n      row_number: 2,\n      last_processed_form_response_row: Number(lastOrder.form_response_row_number)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        -656
+      ],
+      "id": "5aa7a443-f3c2-4c6b-92d4-64d2106f02f6",
+      "name": "format_updated_batch_counters"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4277f92b-1b96-490e-82a2-f02203165e3b",
+              "name": "created_at",
+              "value": "={{ $('order_pricing').item.json.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "96500205-1d02-4a99-a685-3571e919b404",
+              "name": "order_id",
+              "value": "={{ $('order_pricing').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f298d5aa-9c13-4d79-954c-8d3277a97435",
+              "name": "customer_name",
+              "value": "={{ $('order_pricing').item.json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "add3fc96-c5e1-4d19-84f4-34d49b15438d",
+              "name": "college_code",
+              "value": "={{ $('order_pricing').item.json.college_code }}",
+              "type": "string"
+            },
+            {
+              "id": "49ab1d25-fcae-43c9-ae95-f4a69ca48150",
+              "name": "whatsapp_number",
+              "value": "={{ $('order_pricing').item.json.whatsapp_number }}",
+              "type": "string"
+            },
+            {
+              "id": "be68fea8-b7ce-4fb7-b6ce-69b61c7d72ec",
+              "name": "college_name",
+              "value": "={{ $('order_pricing').item.json.college_name }}",
+              "type": "string"
+            },
+            {
+              "id": "bb143da5-d8ec-44c9-98f7-5196277f0dc6",
+              "name": "delivery_date",
+              "value": "={{ $('order_pricing').item.json.delivery_date }}",
+              "type": "string"
+            },
+            {
+              "id": "bacaf8d7-64e0-42fc-9a9a-319813a53bcc",
+              "name": "delivery_slot",
+              "value": "={{ $('order_pricing').item.json.delivery_slot }}",
+              "type": "string"
+            },
+            {
+              "id": "6f3268ae-6286-442b-8264-a23dea97187b",
+              "name": "delivery_batch_id",
+              "value": "={{ $('order_pricing').item.json.delivery_batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "9fe34617-d1ad-4de9-873f-21602dbf00d5",
+              "name": "pdf_file_url",
+              "value": "={{ $('order_pricing').item.json.pdf_file_url }}",
+              "type": "string"
+            },
+            {
+              "id": "eaeaaa26-4535-4e65-9c2e-2da994cd4d97",
+              "name": "binding_type",
+              "value": "={{ $('order_pricing').item.json.binding_type }}",
+              "type": "string"
+            },
+            {
+              "id": "e476ade8-145d-4876-bcc8-65f7096dab02",
+              "name": "copies",
+              "value": "={{ $('order_pricing').item.json.copies }}",
+              "type": "string"
+            },
+            {
+              "id": "de65e2a8-6758-4157-8fd7-70067ab8fb53",
+              "name": "color_pages_list",
+              "value": "={{ $('order_pricing').item.json.color_pages_list }}",
+              "type": "string"
+            },
+            {
+              "id": "ba6b74da-7934-4ddf-b4f1-62227caab1dc",
+              "name": "total_pages_per_copy",
+              "value": "={{ $('order_pricing').item.json.total_pages_per_copy }}",
+              "type": "string"
+            },
+            {
+              "id": "93c16785-efc6-45ea-9b4c-014a5b86ef92",
+              "name": "color_pages_count_per_copy",
+              "value": "={{ $('order_pricing').item.json.color_pages_count_per_copy }}",
+              "type": "string"
+            },
+            {
+              "id": "b6e5466d-fcf6-4603-a905-8a9bb2ca89ca",
+              "name": "monochrome_pages_count_per_copy",
+              "value": "={{ $('order_pricing').item.json.monochrome_pages_count_per_copy }}",
+              "type": "string"
+            },
+            {
+              "id": "ec5013f9-07eb-47a2-80be-4aa9c6c91cac",
+              "name": "special_pages",
+              "value": "={{ $('order_pricing').item.json.special_pages }}",
+              "type": "string"
+            },
+            {
+              "id": "eb181b7c-5e08-4d95-b5c7-b4c29d985d1b",
+              "name": "special_instructions",
+              "value": "={{ $('order_pricing').item.json.special_instructions }}",
+              "type": "string"
+            },
+            {
+              "id": "682024d2-9cb0-4211-baac-35d3f1d58671",
+              "name": "whatsapp_sent",
+              "value": "={{ $('order_pricing').item.json.whatsapp_sent }}",
+              "type": "string"
+            },
+            {
+              "id": "f95d6f15-c03c-4a75-a90b-497dd896b833",
+              "name": "notion_synced",
+              "value": "=YES",
+              "type": "string"
+            },
+            {
+              "id": "3e66d66b-58d4-4e23-9857-500432e8ce1e",
+              "name": "order_status",
+              "value": "={{ $('order_pricing').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "acac143a-1c3e-4dbc-881c-bba4c9248127",
+              "name": "payment_status",
+              "value": "={{ $('order_pricing').item.json.payment_status }}",
+              "type": "string"
+            },
+            {
+              "id": "83728629-1f8a-4efc-977d-cbe89ada3ce9",
+              "name": "has_transparent_sheet",
+              "value": "={{ $('order_pricing').item.json.has_transparent_sheet }}",
+              "type": "string"
+            },
+            {
+              "id": "33486cef-ddec-4c3c-91c5-a6396731e212",
+              "name": "glossy_front_page",
+              "value": "={{ $('order_pricing').item.json.glossy_front_page }}",
+              "type": "string"
+            },
+            {
+              "id": "2df34f07-7df8-42ef-a0a0-5bddb1c39716",
+              "name": "full_report_in_bond_paper",
+              "value": "={{ $('order_pricing').item.json.full_report_in_bond_paper }}",
+              "type": "string"
+            },
+            {
+              "id": "42db9b2b-1e8e-4e94-8027-918aa74f9dad",
+              "name": "bonafied_page_in_bond_paper",
+              "value": "={{ $('order_pricing').item.json.bonafied_page_in_bond_paper }}",
+              "type": "string"
+            },
+            {
+              "id": "472a09c6-5041-41f7-b734-6eeb45ced5bc",
+              "name": "form_response_row_number",
+              "value": "={{ $('order_pricing').item.json.form_response_row_number }}",
+              "type": "string"
+            },
+            {
+              "id": "c848c220-5f47-49e3-befd-8340fc7ac51b",
+              "name": "batch_id",
+              "value": "={{ $('order_pricing').item.json.batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "79520a51-3460-46ed-a81f-ec36bbb93cd5",
+              "name": "print_type",
+              "value": "={{ $('order_pricing').item.json.print_type }}",
+              "type": "string"
+            },
+            {
+              "id": "0daf8431-1803-4644-a85a-3ac25236e7a4",
+              "name": "notion_page_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e7b60967-eb37-45a7-9e42-e3d386cf9efd",
+              "name": "=per_copy_total",
+              "value": "={{ $('order_pricing').item.json.per_copy_total }}",
+              "type": "number"
+            },
+            {
+              "id": "70684f21-e3cb-4f22-a3c4-a318da2e80ec",
+              "name": "order_total",
+              "value": "={{ $('order_pricing').item.json.order_total }}",
+              "type": "string"
+            },
+            {
+              "id": "4be2c1b6-21ce-4df0-9d14-702d9a8b12d4",
+              "name": "late_night_order",
+              "value": "={{ $('order_pricing').item.json.late_night_order }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3136,
+        -464
+      ],
+      "id": "653b4996-fef5-4e34-844b-31de630318fc",
+      "name": "processed_orders_formatting"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "fetch last_batch_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapping fields to execution terminology": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "fetch last_batch_markers": {
+      "main": [
+        [
+          {
+            "node": "fetch_order_counters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "fetch_new_orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order_business_rules": {
+      "main": [
+        [
+          {
+            "node": "download_pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order_pricing": {
+      "main": [
+        [
+          {
+            "node": "create_orders_notion_page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "assign_order_id": {
+      "main": [
+        [
+          {
+            "node": "flatten_order_details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_updated_counters": {
+      "main": [
+        [
+          {
+            "node": "update_order_counters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_order_counters": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_orders_notion_page": {
+      "main": [
+        [
+          {
+            "node": "format_updated_counters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "format_updated_batch_counters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "processed_orders_formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_order_counters": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_batch_markers": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge_2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "fetch_order_counters": {
+      "main": [
+        [
+          {
+            "node": "format_order_counters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_new_orders": {
+      "main": [
+        [
+          {
+            "node": "mapping fields to execution terminology",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wait_and_merge": {
+      "main": [
+        [
+          {
+            "node": "assign_order_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "flatten_order_details": {
+      "main": [
+        [
+          {
+            "node": "order_business_rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download_pdf": {
+      "main": [
+        [
+          {
+            "node": "extract_pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract_pdf": {
+      "main": [
+        [
+          {
+            "node": "map_order_details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "map_order_details": {
+      "main": [
+        [
+          {
+            "node": "order_pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wait_and_merge_2": {
+      "main": [
+        [
+          {
+            "node": "save_processed_orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_updated_batch_counters": {
+      "main": [
+        [
+          {
+            "node": "update_batch_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processed_orders_formatting": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge_2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3c13dae4-c242-4e02-9200-acbe296cd97a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
+  },
+  "id": "DETuNjYNboI0TNF0",
+  "tags": []
+}

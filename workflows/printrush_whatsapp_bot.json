@@ -1,0 +1,956 @@
+{
+  "name": "printrush_whatsapp_bot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -264
+      ],
+      "id": "eafd858b-1844-477c-8ea2-754489264e9c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1276047496,
+          "mode": "list",
+          "cachedResultName": "last_batch_markers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1276047496"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -264
+      ],
+      "id": "ee89c835-0536-4bef-a5ee-f2eda48a7f2e",
+      "name": "fetch_last_batch_markers ",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 14100729,
+          "mode": "list",
+          "cachedResultName": "processed_orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=14100729"
+        },
+        "combineFilters": "=AND",
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "=A{{ $json.last_whatsapp_notification_sent_row }}:AF"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -264
+      ],
+      "id": "da726bac-5c56-4e0f-b296-7d3bdcaf2f38",
+      "name": "fetch_processed_orders",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:3000/api/contacts/check-exists",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=91{{ $json.whatsapp_number }}@c.us"
+            },
+            {
+              "name": "session",
+              "value": "default"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "99eaa92a90454250b3a8386f61f9d2fc"
+            }
+          ]
+        },
+        "options": {
+          "response": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        -264
+      ],
+      "id": "8bc4fbc0-0111-4b96-a143-d21814177dbd",
+      "name": "validate_whatsapp_number"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bae08ee5-3733-440b-a358-9b157df54106",
+              "leftValue": "={{ $json.numberExists }}",
+              "rightValue": "=true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -264
+      ],
+      "id": "6628af8f-a7fe-46ce-a6d9-2740d81e6c2a",
+      "name": "valid_number_condition"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "99eaa92a90454250b3a8386f61f9d2fc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session",
+              "value": "=default"
+            },
+            {
+              "name": "chatId",
+              "value": "=91{{ $('fetch_processed_orders').item.json.whatsapp_number }}@c.us"
+            },
+            {
+              "name": "text",
+              "value": "=Hi {{ $('fetch_processed_orders').item.json.customer_name }},\n\nYour PrintRush order has been placed successfully.\n\nOrder Id: {{ $('fetch_processed_orders').item.json.order_id }}\n\nDelivery Date: {{ $('fetch_processed_orders').item.json.delivery_date }}\nDelivery Slot: {{ $('fetch_processed_orders').item.json.delivery_slot }}\nCopies: {{ $('fetch_processed_orders').item.json.copies }}\nCost of single copy: {{ $('fetch_processed_orders').item.json.per_copy_total }}\n\nOrder Total: {{ $('fetch_processed_orders').item.json.order_total }}\n\nNote: late night orders after 10:00 PM incur late night processing charge of 25 Rupees."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        -336
+      ],
+      "id": "99fa2a2b-38a0-4c2c-bbd6-55a2880c798f",
+      "name": "message_trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        -264
+      ],
+      "id": "e815bd8a-26c5-413c-8e8e-7aacfb04f6ce",
+      "name": "wait_and_merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0f57fbfe-1928-43fd-8208-3ce9ba90c609",
+              "name": "created_at",
+              "value": "={{ $('fetch_processed_orders').item.json.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "c9511a99-a9d3-4227-845a-b06ce1af4dc7",
+              "name": "order_id",
+              "value": "={{ $('fetch_processed_orders').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "61b18ff8-d7d3-4860-b7fe-cf72b1da642c",
+              "name": "notion_page_id",
+              "value": "={{ $('fetch_processed_orders').item.json.notion_page_id }}",
+              "type": "string"
+            },
+            {
+              "id": "147cca02-bcd7-4f0a-911b-8155c4a1e607",
+              "name": "delivery_batch_id",
+              "value": "={{ $('fetch_processed_orders').item.json.delivery_batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4512f852-2dab-433a-b2c1-5dd16a5d9b52",
+              "name": "whatsapp_sent",
+              "value": "={{\n  $('validate_whatsapp_number').item.json.numberExists\n    ? 'YES'\n    : 'INVALID NUMBER'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1792,
+        -264
+      ],
+      "id": "8cce6d58-4dc8-45d9-abea-ae83dc20ffee",
+      "name": "extract_fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 14100729,
+          "mode": "list",
+          "cachedResultName": "processed_orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=14100729"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "whatsapp_sent": "={{ $json.whatsapp_sent }}"
+          },
+          "matchingColumns": [
+            "order_id"
+          ],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "college_code",
+              "displayName": "college_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "college_name",
+              "displayName": "college_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "delivery_date",
+              "displayName": "delivery_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "delivery_slot",
+              "displayName": "delivery_slot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "delivery_batch_id",
+              "displayName": "delivery_batch_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "late_night_order",
+              "displayName": "late_night_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pdf_file_url",
+              "displayName": "pdf_file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "binding_type",
+              "displayName": "binding_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "copies",
+              "displayName": "copies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "color_pages_list",
+              "displayName": "color_pages_list",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_pages_per_copy",
+              "displayName": "total_pages_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "color_pages_count_per_copy",
+              "displayName": "color_pages_count_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "monochrome_pages_count_per_copy",
+              "displayName": "monochrome_pages_count_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "special_pages",
+              "displayName": "special_pages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "special_instructions",
+              "displayName": "special_instructions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "whatsapp_sent",
+              "displayName": "whatsapp_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notion_synced",
+              "displayName": "notion_synced",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "order_status",
+              "displayName": "order_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_transparent_sheet",
+              "displayName": "has_transparent_sheet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "glossy_front_page_count_per_copy",
+              "displayName": "glossy_front_page_count_per_copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "full_report_in_bond_paper",
+              "displayName": "full_report_in_bond_paper",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "form_response_row_number",
+              "displayName": "form_response_row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_id",
+              "displayName": "batch_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "per_copy_total",
+              "displayName": "per_copy_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "order_total",
+              "displayName": "order_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2016,
+        -264
+      ],
+      "id": "be564e9e-de08-4c56-a4a8-df02270732ba",
+      "name": "update_processed_orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('extract_fields').item.json.notion_page_id }}",
+          "mode": "id"
+        },
+        "simple": false,
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "whatsapp_sent|select",
+              "selectValue": "={{ $('extract_fields').item.json.whatsapp_sent }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        -264
+      ],
+      "id": "f3436e76-8801-4112-aaba-dd569bf2d4d9",
+      "name": "update_whatsapp_sent",
+      "credentials": {
+        "notionApi": {
+          "id": "7VwtTjmlY99rvBLT",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU",
+          "mode": "list",
+          "cachedResultName": "dev_rush_order_responses",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1276047496,
+          "mode": "list",
+          "cachedResultName": "last_batch_markers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1avuUjR347Fa_Lhn3deOn1_F0BvXvYshWHqTFU_6WffU/edit#gid=1276047496"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "last_whatsapp_notification_sent_row": "={{ $json.last_whatsapp_notification_sent_row }}",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "last_processed_form_response_row",
+              "displayName": "last_processed_form_response_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_notion_synced_row",
+              "displayName": "last_notion_synced_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_whatsapp_notification_sent_row",
+              "displayName": "last_whatsapp_notification_sent_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2688,
+        -264
+      ],
+      "id": "9858fcc7-3f7a-40c5-a6a8-be38861bcde9",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ad8dShykOEh9V7rS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $('fetch_processed_orders').all().map(item => item.json);\n\nlet last_whatsapp_notification_sent_row = 0;\n\nfor (const row of rows) {\n  const rowNum = row.form_response_row_number;\n\n  if (rowNum == null) {\n    continue;\n  }\n\n  last_whatsapp_notification_sent_row = Math.max(\n    last_whatsapp_notification_sent_row,\n    Number(rowNum)\n  );\n}\n\nreturn [\n  {\n    json: {\n      last_whatsapp_notification_sent_row,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        -264
+      ],
+      "id": "54d84e79-8896-43db-9a03-79f2d2409f43",
+      "name": "updated_counters"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "503d6fd3-96e4-47f5-a1af-1100ce76ed3b",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -264
+      ],
+      "id": "621cde1c-8832-4c11-8cf2-3cbacbf729e6",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "fetch_last_batch_markers ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_last_batch_markers ": {
+      "main": [
+        [
+          {
+            "node": "fetch_processed_orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate_whatsapp_number": {
+      "main": [
+        [
+          {
+            "node": "valid_number_condition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_processed_orders": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valid_number_condition": {
+      "main": [
+        [
+          {
+            "node": "message_trigger",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "wait_and_merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "message_trigger": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wait_and_merge": {
+      "main": [
+        [
+          {
+            "node": "extract_fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract_fields": {
+      "main": [
+        [
+          {
+            "node": "update_processed_orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_processed_orders": {
+      "main": [
+        [
+          {
+            "node": "update_whatsapp_sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_whatsapp_sent": {
+      "main": [
+        [
+          {
+            "node": "updated_counters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updated_counters": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "validate_whatsapp_number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "badd95c9-cbef-498d-a591-8af708dd06ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
+  },
+  "id": "AR1dHlNrMwmLui5x",
+  "tags": []
+}

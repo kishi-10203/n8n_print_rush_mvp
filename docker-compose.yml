@@ -1,76 +1,127 @@
-version: "3.9"
+version: "3.8"
 
 services:
+
   n8n:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: custom-n8n:1.111.0
-    container_name: printrush_n8n_server
+    image: n8nio/n8n:1.111.0
+    container_name: n8n_server
     restart: unless-stopped
+
     ports:
       - "5678:5678"
+
     environment:
-      # =====================================================
-      # TIMEZONE
-      # =====================================================
-      TZ: Asia/Kolkata
-      GENERIC_TIMEZONE: Asia/Kolkata
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
 
-      # =====================================================
-      # CORE
-      # =====================================================
-      N8N_HOST: 0.0.0.0
-      N8N_PORT: 5678
-      N8N_PROTOCOL: http
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${TZ}
 
-      # =====================================================
-      # SECURITY
-      # =====================================================
-      N8N_ENCRYPTION_KEY: REPLACE_WITH_SECURE_RANDOM_KEY
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
 
-      # =====================================================
-      # EXECUTION
-      # =====================================================
-      EXECUTIONS_MODE: regular
-      EXECUTIONS_DATA_PRUNE: "true"
-      EXECUTIONS_DATA_MAX_AGE: 168
+      # Python / JS runners
+      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
+      - N8N_RUNNERS_MODE=${N8N_RUNNERS_MODE}
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=${N8N_RUNNERS_BROKER_LISTEN_ADDRESS}
+      - N8N_NATIVE_PYTHON_RUNNER=${N8N_NATIVE_PYTHON_RUNNER}
 
-      # =====================================================
-      # LOGGING
-      # =====================================================
-      N8N_LOG_LEVEL: info
+      # optional execution settings
+      - EXECUTIONS_MODE=${EXECUTIONS_MODE}
+      - EXECUTIONS_DATA_PRUNE=${EXECUTIONS_DATA_PRUNE}
+      - EXECUTIONS_DATA_MAX_AGE=${EXECUTIONS_DATA_MAX_AGE}
 
-      # =====================================================
-      # OPTIONAL
-      # =====================================================
-      N8N_DIAGNOSTICS_ENABLED: "false"
     volumes:
-      # -----------------------------------------------------
-      # Main n8n persistent data
-      # -----------------------------------------------------
-      - ./n8n_data:/home/node/.n8n
+      - n8n_data:/home/node/.n8n
 
-      # -----------------------------------------------------
-      # Workflow exports / backups
-      # -----------------------------------------------------
-      - ./workflows:/workflows
-
-      # -----------------------------------------------------
-      # PDFs / scripts / temp files
-      # -----------------------------------------------------
-      - ./files:/files
     networks:
       - n8n_network
-    healthcheck:
-      test:
-        ["CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+
+
+  task-runners:
+    image: n8nio/runners:1.111.0
+    container_name: python_runner
+    restart: unless-stopped
+
+    depends_on:
+      - n8n
+
+    command:
+      - javascript
+      - python
+
+    environment:
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+
+    networks:
+      - n8n_network
+
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: waha_service
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      # Core auth
+      - WAHA_API_KEY=${WAHA_API_KEY}
+
+      # Dashboard + Swagger
+      - WAHA_DASHBOARD_ENABLED=${WAHA_DASHBOARD_ENABLED}
+      - WHATSAPP_SWAGGER_ENABLED=${WHATSAPP_SWAGGER_ENABLED}
+
+      - WAHA_DASHBOARD_USERNAME=${WAHA_DASHBOARD_USERNAME}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_DASHBOARD_PASSWORD}
+
+      - WHATSAPP_SWAGGER_USERNAME=${WHATSAPP_SWAGGER_USERNAME}
+      - WHATSAPP_SWAGGER_PASSWORD=${WHATSAPP_SWAGGER_PASSWORD}
+
+      # Engine
+      - WHATSAPP_DEFAULT_ENGINE=${WHATSAPP_DEFAULT_ENGINE}
+
+      # Base + logs
+      - WAHA_BASE_URL=${WAHA_BASE_URL}
+      - WAHA_LOG_LEVEL=${WAHA_LOG_LEVEL}
+      - WAHA_LOG_FORMAT=${WAHA_LOG_FORMAT}
+
+      # Media settings
+      - WAHA_MEDIA_STORAGE=${WAHA_MEDIA_STORAGE}
+      - WHATSAPP_FILES_LIFETIME=${WHATSAPP_FILES_LIFETIME}
+      - WHATSAPP_FILES_FOLDER=${WHATSAPP_FILES_FOLDER}
+
+      # Performance / runtime
+      - NODE_OPTIONS=${NODE_OPTIONS}
+      - PUPPETEER_SKIP_DOWNLOAD=${PUPPETEER_SKIP_DOWNLOAD}
+      - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING}
+      - CHOKIDAR_INTERVAL=${CHOKIDAR_INTERVAL}
+
+      # Internals
+      - WAHA_GOWS_PATH=${WAHA_GOWS_PATH}
+      - WAHA_GOWS_SOCKET=${WAHA_GOWS_SOCKET}
+      - WAHA_ZIPPER=${WAHA_ZIPPER}
+      - GODEBUG=${GODEBUG}
+
+      - WAHA_NAMESPACE=${WAHA_NAMESPACE}
+
+    volumes:
+      - waha_sessions:/app/sessions
+      - waha_media:/app/.media
+
+    networks:
+      - n8n_network
+
+
+volumes:
+  n8n_data:
+  waha_sessions:
+  waha_media:
+
 
 networks:
   n8n_network:
     driver: bridge
-
