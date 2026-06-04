@@ -1083,7 +1083,8 @@
         192
       ],
       "id": "9d9efa2b-3e29-40c1-a46e-76ff24e725b3",
-      "name": "extract_pdf"
+      "name": "extract_pdf",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -1850,7 +1851,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "bb1ad8ae-ef8c-459f-8c2f-b20063da7aa6",
+  "versionId": "498f939a-26f6-48ff-972f-d0bc9c1bc941",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
