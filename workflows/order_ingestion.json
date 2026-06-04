@@ -233,7 +233,7 @@
       "typeVersion": 2,
       "position": [
         -224,
-        192
+        176
       ],
       "id": "d0b639a5-b302-4272-823e-507ea4734f10",
       "name": "order_pricing",
@@ -262,7 +262,7 @@
       "typeVersion": 2,
       "position": [
         224,
-        0
+        -16
       ],
       "id": "c6be7096-93d2-4fc9-a768-d4456aa2c1d9",
       "name": "format_updated_counters"
@@ -417,7 +417,7 @@
       "typeVersion": 2.2,
       "position": [
         0,
-        192
+        176
       ],
       "id": "ef73247b-6a9f-4146-9327-fabc0ec2119d",
       "name": "create_orders_notion_page",
@@ -506,7 +506,7 @@
       "typeVersion": 4.7,
       "position": [
         448,
-        0
+        -16
       ],
       "id": "44e7bd85-34bc-4d4f-9dfd-9f30d312b488",
       "name": "update_order_counters",
@@ -604,7 +604,7 @@
       "typeVersion": 4.7,
       "position": [
         448,
-        192
+        176
       ],
       "id": "3d37b6bf-b5c7-4539-93bd-cc1afc1fe9af",
       "name": "update_batch_markers",
@@ -974,7 +974,7 @@
       "typeVersion": 4.7,
       "position": [
         896,
-        192
+        176
       ],
       "id": "d758e938-c09f-4784-8532-2941092cb97b",
       "name": "save_processed_orders",
@@ -1177,7 +1177,7 @@
             {
               "id": "8e74d584-63a3-49e2-9135-528e1da4e5ed",
               "name": "total_pages_per_copy",
-              "value": "={{ $json.numpages }}",
+              "value": "={{ Number($json.numpages || 0) }}",
               "type": "number"
             },
             {
@@ -1189,7 +1189,7 @@
             {
               "id": "52e4cba0-819d-42e2-ad2c-3d61aa830088",
               "name": "monochrome_pages_count_per_copy",
-              "value": "={{\n  Math.max(\n    0,\n    $json.numpages - Number($('order_business_rules').item.json.color_pages_count_per_copy || 0)\n  )\n}}",
+              "value": "={{\n  Math.max(\n    0,\n    Number($json.numpages || 0) -\n    Number($('order_business_rules')?.item?.json?.color_pages_count_per_copy || 0)\n  )\n}}",
               "type": "number"
             },
             {
@@ -1219,7 +1219,7 @@
             {
               "id": "100d3850-4698-464b-be87-04e8ae698dbf",
               "name": "order_status",
-              "value": "={{ $('order_business_rules').item.json.order_status }}",
+              "value": "={{\n  Number($json.numpages ?? 0) > 0\n    ? 'NEW'\n    : 'PDF ISSUE'\n}}",
               "type": "string"
             },
             {
@@ -1284,7 +1284,7 @@
       "typeVersion": 3.4,
       "position": [
         -448,
-        192
+        176
       ],
       "id": "ae5e8141-61dd-424e-abe2-a266541c9baa",
       "name": "map_order_details"
@@ -1299,20 +1299,20 @@
       "typeVersion": 3.2,
       "position": [
         672,
-        176
+        160
       ],
       "id": "ee6d1da8-9504-48a7-a51a-7ad8a43b6ae8",
       "name": "wait_and_merge_2"
     },
     {
       "parameters": {
-        "jsCode": "const orders = $(\"order_pricing\").all().map(item => item.json);\nconst lastOrder = orders[orders.length - 1];\n\nreturn [\n  {\n    json: {\n      row_number: 2,\n      last_processed_form_response_row: Number(lastOrder.form_response_row_number)\n    }\n  }\n];"
+        "jsCode": "const orders = $(\"order_business_rules\").all().map(item => item.json);\nconst lastOrder = orders[orders.length - 1];\n\nreturn [\n  {\n    json: {\n      row_number: 2,\n      last_processed_form_response_row: Number(lastOrder.form_response_row_number)\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         224,
-        192
+        176
       ],
       "id": "be15a097-cad5-42f1-ac30-8ea1d9adef78",
       "name": "format_updated_batch_counters"
@@ -1526,8 +1526,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        352,
-        432
+        368,
+        416
       ],
       "id": "d35d00ac-9012-4368-abc8-04ca1579f6be",
       "name": "processed_orders_formatting"
@@ -1777,6 +1777,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "map_order_details",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1851,7 +1858,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "498f939a-26f6-48ff-972f-d0bc9c1bc941",
+  "versionId": "fdd3ff43-f3e7-4f31-8e0d-9e5980414beb",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
