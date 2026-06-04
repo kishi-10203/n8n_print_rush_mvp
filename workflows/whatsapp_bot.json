@@ -1,5 +1,5 @@
 {
-  "name": "printrush_whatsapp_bot",
+  "name": "whatsapp_bot",
   "nodes": [
     {
       "parameters": {
@@ -15,10 +15,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        -264
+        -1312,
+        -16
       ],
-      "id": "eafd858b-1844-477c-8ea2-754489264e9c",
+      "id": "399efca9-1a0c-4dc3-ae94-b228e89b4dee",
       "name": "Schedule Trigger"
     },
     {
@@ -42,14 +42,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        224,
-        -264
+        -1088,
+        -16
       ],
-      "id": "ee89c835-0536-4bef-a5ee-f2eda48a7f2e",
+      "id": "a58e8117-4ef6-4ff1-912e-827a4ee43f3f",
       "name": "fetch_last_batch_markers ",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Ad8dShykOEh9V7rS",
+          "id": "G8poEVpbAReMy0WI",
           "name": "Google Sheets account"
         }
       }
@@ -74,8 +74,7 @@
         "options": {
           "dataLocationOnSheet": {
             "values": {
-              "rangeDefinition": "specifyRangeA1",
-              "range": "=A{{ $json.last_whatsapp_notification_sent_row }}:AF"
+              "rangeDefinition": "detectAutomatically"
             }
           }
         }
@@ -83,10 +82,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        448,
-        -264
+        -864,
+        -16
       ],
-      "id": "da726bac-5c56-4e0f-b296-7d3bdcaf2f38",
+      "id": "0883e7e7-19f8-41ae-b34c-6ceae5c54d46",
       "name": "fetch_processed_orders",
       "executeOnce": true,
       "retryOnFail": true,
@@ -94,7 +93,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Ad8dShykOEh9V7rS",
+          "id": "G8poEVpbAReMy0WI",
           "name": "Google Sheets account"
         }
       }
@@ -131,10 +130,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        896,
-        -264
+        -192,
+        -16
       ],
-      "id": "8bc4fbc0-0111-4b96-a143-d21814177dbd",
+      "id": "86239eed-555a-4c13-824d-483cac4af4fb",
       "name": "validate_whatsapp_number"
     },
     {
@@ -165,62 +164,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1120,
-        -264
+        32,
+        -16
       ],
-      "id": "6628af8f-a7fe-46ce-a6d9-2740d81e6c2a",
+      "id": "229d0b73-02f1-4fb5-9067-3047ddd532e4",
       "name": "valid_number_condition"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/api/sendText",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Api-Key",
-              "value": "99eaa92a90454250b3a8386f61f9d2fc"
-            }
-          ]
-        },
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "session",
-              "value": "=default"
-            },
-            {
-              "name": "chatId",
-              "value": "=91{{ $('fetch_processed_orders').item.json.whatsapp_number }}@c.us"
-            },
-            {
-              "name": "text",
-              "value": "=Hi {{ $('fetch_processed_orders').item.json.customer_name }},\n\nYour PrintRush order has been placed successfully.\n\nOrder Id: {{ $('fetch_processed_orders').item.json.order_id }}\n\nDelivery Date: {{ $('fetch_processed_orders').item.json.delivery_date }}\nDelivery Slot: {{ $('fetch_processed_orders').item.json.delivery_slot }}\nCopies: {{ $('fetch_processed_orders').item.json.copies }}\nCost of single copy: {{ $('fetch_processed_orders').item.json.per_copy_total }}\n\nOrder Total: {{ $('fetch_processed_orders').item.json.order_total }}\n\nNote: late night orders after 10:00 PM incur late night processing charge of 25 Rupees."
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1344,
-        -336
-      ],
-      "id": "99fa2a2b-38a0-4c2c-bbd6-55a2880c798f",
-      "name": "message_trigger"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1568,
-        -264
+        704,
+        -16
       ],
-      "id": "e815bd8a-26c5-413c-8e8e-7aacfb04f6ce",
+      "id": "dee0dc49-c740-406f-94ba-70a0044967e3",
       "name": "wait_and_merge"
     },
     {
@@ -264,10 +222,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1792,
-        -264
+        928,
+        -16
       ],
-      "id": "8cce6d58-4dc8-45d9-abea-ae83dc20ffee",
+      "id": "0e976623-e235-439d-88bf-69af2825216f",
       "name": "extract_fields"
     },
     {
@@ -616,14 +574,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2016,
-        -264
+        1152,
+        -16
       ],
-      "id": "be564e9e-de08-4c56-a4a8-df02270732ba",
+      "id": "d4ef3bc7-4102-4983-890f-3e55fba3e417",
       "name": "update_processed_orders",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Ad8dShykOEh9V7rS",
+          "id": "G8poEVpbAReMy0WI",
           "name": "Google Sheets account"
         }
       }
@@ -651,14 +609,14 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        2240,
-        -264
+        1376,
+        -16
       ],
-      "id": "f3436e76-8801-4112-aaba-dd569bf2d4d9",
+      "id": "6255cfb4-8c67-4bc7-b91d-ad2a3c6e6d3e",
       "name": "update_whatsapp_sent",
       "credentials": {
         "notionApi": {
-          "id": "7VwtTjmlY99rvBLT",
+          "id": "4qUYKN5kjAqccUAm",
           "name": "Notion account"
         }
       }
@@ -739,14 +697,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2688,
-        -264
+        1824,
+        -16
       ],
-      "id": "9858fcc7-3f7a-40c5-a6a8-be38861bcde9",
+      "id": "ff51983b-b910-4e70-91eb-10176bffb0cc",
       "name": "Update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Ad8dShykOEh9V7rS",
+          "id": "G8poEVpbAReMy0WI",
           "name": "Google Sheets account"
         }
       }
@@ -758,10 +716,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2464,
-        -264
+        1600,
+        -16
       ],
-      "id": "54d84e79-8896-43db-9a03-79f2d2409f43",
+      "id": "ae98f603-889c-49f3-8bdf-1436a28028c4",
       "name": "updated_counters"
     },
     {
@@ -792,11 +750,107 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        672,
-        -264
+        -416,
+        -16
       ],
-      "id": "621cde1c-8832-4c11-8cf2-3cbacbf729e6",
+      "id": "1b00277c-3026-4d9f-af65-004520b44173",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "99eaa92a90454250b3a8386f61f9d2fc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session",
+              "value": "=default"
+            },
+            {
+              "name": "chatId",
+              "value": "=91{{ $('fetch_processed_orders').item.json.whatsapp_number }}@c.us"
+            },
+            {
+              "name": "text",
+              "value": "=Hi {{ $('filter_new_orders').item.json.customer_name }},\n\nYour PrintRush order has been placed successfully.\n\nOrder Id: {{ $('filter_new_orders').item.json.order_id }}\n\nDelivery Date: {{ $('filter_new_orders').item.json.delivery_date }}\nDelivery Slot: {{ $('filter_new_orders').item.json.delivery_slot }}\nCopies: {{ $('filter_new_orders').item.json.copies }}\n\nNote: late night orders after 10:00 PM incur late night processing charge of 25 Rupees."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        256,
+        -80
+      ],
+      "id": "f3a58e52-b476-469a-bcbf-667972295d1c",
+      "name": "order_confirmation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "99eaa92a90454250b3a8386f61f9d2fc"
+            },
+            {}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=Order Specifications,\n\nOrder id: {{ $('filter_new_orders').item.json.order_id }}\ncopies : {{ $('filter_new_orders').item.json.copies }}\nBinding type : {{ $('filter_new_orders').item.json.binding_type }}\nper copy total : {{ $('filter_new_orders').item.json.per_copy_total }}\n\norder total : {{ $('filter_new_orders').item.json.order_total }}\n"
+            },
+            {
+              "name": "session",
+              "value": "default"
+            },
+            {
+              "name": "chatId",
+              "value": "=91{{ $('fetch_processed_orders').item.json.whatsapp_number }}@c.us"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        -80
+      ],
+      "id": "fec49518-2d45-45d4-92cb-3fcc327b1738",
+      "name": "order_specification"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lastProcessed = Number(\n  $('fetch_last_batch_markers ').first().json.last_whatsapp_notification_sent_row || 0\n);\n\nconst output = [];\n\nfor (const item of $('fetch_processed_orders').all()) {\n  const row = item.json;\n\n  if (Number(row.row_number || 0) > lastProcessed) {\n    output.push(item);\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        -16
+      ],
+      "id": "b597dbdd-2fa5-49f0-9434-6467851f73b8",
+      "name": "filter_new_orders"
     }
   ],
   "pinData": {},
@@ -838,7 +892,7 @@
       "main": [
         [
           {
-            "node": "If",
+            "node": "filter_new_orders",
             "type": "main",
             "index": 0
           }
@@ -849,7 +903,7 @@
       "main": [
         [
           {
-            "node": "message_trigger",
+            "node": "order_confirmation",
             "type": "main",
             "index": 0
           }
@@ -859,17 +913,6 @@
             "node": "wait_and_merge",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "message_trigger": {
-      "main": [
-        [
-          {
-            "node": "wait_and_merge",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -940,17 +983,50 @@
           }
         ]
       ]
+    },
+    "order_confirmation": {
+      "main": [
+        [
+          {
+            "node": "order_specification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order_specification": {
+      "main": [
+        [
+          {
+            "node": "wait_and_merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter_new_orders": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "badd95c9-cbef-498d-a591-8af708dd06ab",
+  "versionId": "bb1ad8ae-ef8c-459f-8c2f-b20063da7aa6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
   },
-  "id": "AR1dHlNrMwmLui5x",
+  "id": "4yHrZZ6qHWTj0dOh",
   "tags": []
 }
