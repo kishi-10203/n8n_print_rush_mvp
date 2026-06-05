@@ -408,6 +408,10 @@
             {
               "key": "order_total|number",
               "numberValue": "={{ $json.order_total }}"
+            },
+            {
+              "key": "full_report_in_bond_paper|select",
+              "selectValue": "={{ $json.full_report_in_bond_paper }}"
             }
           ]
         },
@@ -1526,8 +1530,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        368,
-        416
+        352,
+        432
       ],
       "id": "d35d00ac-9012-4368-abc8-04ca1579f6be",
       "name": "processed_orders_formatting"
@@ -1858,7 +1862,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "fdd3ff43-f3e7-4f31-8e0d-9e5980414beb",
+  "versionId": "4e766bc0-646c-428c-bad6-f6626e2f71ba",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"

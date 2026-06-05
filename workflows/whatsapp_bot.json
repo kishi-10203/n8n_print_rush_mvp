@@ -911,6 +911,12 @@
               "name": "order_total",
               "value": "={{ $json.order_total }}",
               "type": "number"
+            },
+            {
+              "id": "f0044726-cbd7-4178-88e7-9348c720fe4c",
+              "name": "binding_type",
+              "value": "={{ $json.binding_type }}",
+              "type": "string"
             }
           ]
         },
@@ -1094,7 +1100,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "e7541b5d-8221-495e-be54-73999fb9846b",
+  "versionId": "703c0bc4-e263-4396-bd94-775a8d5440ad",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
