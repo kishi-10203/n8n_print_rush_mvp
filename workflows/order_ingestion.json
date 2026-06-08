@@ -227,7 +227,7 @@
       "parameters": {
         "mode": "runOnceForEachItem",
         "language": "python",
-        "pythonCode": "# PRICING CONSTANTS\n\nBINDING_COST = {\n    \"SOFT BINDING\": 40,\n    \"SPIRAL BINDING\": 60,\n    \"NONE\": 0\n}\n\nCOLOR_RATE_NORMAL = 10\nMONO_RATE_NORMAL = 2.5\n\nCOLOR_RATE_BOND = 20\nMONO_RATE_BOND = 15\n\nGLOSS_RATE = 20\n\nLATE_NIGHT_FEE = 25\n\n\ndef is_yes(val):\n    return str(val).strip().upper() == \"YES\"\n\n\n# Preserve all incoming fields\no = {**item[\"json\"]}\n\ncopies = int(o.get(\"copies\") or 1)\n\n# Options\nis_bond = is_yes(o.get(\"full_report_in_bond_paper\"))\nis_gloss = is_yes(o.get(\"glossy_front_page\"))\nis_late_night = is_yes(o.get(\"late_night_order\"))\n\n# Rates\ncolor_rate = COLOR_RATE_BOND if is_bond else COLOR_RATE_NORMAL\nmono_rate = MONO_RATE_BOND if is_bond else MONO_RATE_NORMAL\n\n# Page counts\ntotal_pages = int(o.get(\"total_pages_per_copy\") or 0)\ncolor_pages = int(o.get(\"color_pages_count_per_copy\") or 0)\nmono_pages = max(total_pages - color_pages, 0)\n\n# Cost components\nbinding_cost = BINDING_COST.get(\n    str(o.get(\"binding_type\", \"NONE\")).strip().upper(),\n    0\n)\n\ncolor_cost = color_pages * color_rate\nmono_cost = mono_pages * mono_rate\ngloss_cost = GLOSS_RATE if is_gloss else 0\n\n# Per-copy pricing\nper_copy_total = (\n    binding_cost +\n    gloss_cost +\n    color_cost +\n    mono_cost\n)\n\n# Order pricing\nlate_fee = LATE_NIGHT_FEE if is_late_night else 0\n\nsubtotal = per_copy_total * copies\n\norder_total = subtotal + late_fee\n\n# Add calculated fields without removing originals\no[\"binding_cost\"] = round(binding_cost, 2)\n\no[\"color_rate\"] = color_rate\no[\"mono_rate\"] = mono_rate\n\no[\"color_pages\"] = color_pages\no[\"mono_pages\"] = mono_pages\n\no[\"color_cost_per_copy\"] = round(color_cost, 2)\no[\"mono_cost_per_copy\"] = round(mono_cost, 2)\n\no[\"gloss_cost_per_copy\"] = round(gloss_cost, 2)\n\no[\"per_copy_total\"] = round(per_copy_total, 2)\n\no[\"copies\"] = copies\n\no[\"subtotal\"] = round(subtotal, 2)\no[\"late_fee\"] = round(late_fee, 2)\n\no[\"order_total\"] = round(order_total, 2)\n\nreturn {\"json\": o}"
+        "pythonCode": "#Binding constants \nBINDING_COST = {\n    \"SOFT BINDING\": 40,\n    \"SPIRAL BINDING\": 60,\n    \"NONE\": 0\n}\n\n#Normal paper cost \nCOLOR_RATE_NORMAL = 10\nMONO_RATE_NORMAL = 2.5\n\n#Bond paper cost \nCOLOR_RATE_BOND = 20\nMONO_RATE_BOND = 15\n\nGLOSS_RATE = 20\n\nLATE_NIGHT_FEE = 25\n\n\ndef is_yes(val):\n    return str(val).strip().upper() == \"YES\"\n\n\n# Preserve all incoming fields\no = {**item[\"json\"]}\n\ncopies = int(o.get(\"copies\") or 1)\n\n# Options\nis_bond = is_yes(o.get(\"full_report_in_bond_paper\"))\nis_gloss = is_yes(o.get(\"glossy_front_page\"))\nis_late_night = is_yes(o.get(\"late_night_order\"))\nis_bonafied = is_yes(o.get(\"bonafied_page_in_bond_paper\"))\n\n# Page counts\ntotal_pages = int(o.get(\"total_pages_per_copy\") or 0)\ncolor_pages = int(o.get(\"color_pages_count_per_copy\") or 0)\n\n# Prevent invalid page counts\ncolor_pages = min(color_pages, total_pages)\nmono_pages = max(total_pages - color_pages, 0)\n\n# Cost components\nbinding_cost = BINDING_COST.get(\n    str(o.get(\"binding_type\", \"NONE\")).strip().upper(),\n    0\n)\n\n# Pricing logic\nif is_bond:\n    # Entire report printed on bond paper\n    color_rate = COLOR_RATE_BOND\n    mono_rate = MONO_RATE_BOND\n\n    color_cost = color_pages * color_rate\n    mono_cost = mono_pages * mono_rate\n\nelse:\n    # Normal pricing\n    color_rate = COLOR_RATE_NORMAL\n    mono_rate = MONO_RATE_NORMAL\n\n    color_cost = color_pages * color_rate\n\n    if is_bonafied and mono_pages > 0:\n        # One mono page charged at bond-paper rate\n        mono_cost = (\n            (mono_pages - 1) * MONO_RATE_NORMAL\n            + MONO_RATE_BOND\n        )\n    else:\n        mono_cost = mono_pages * MONO_RATE_NORMAL\n\n# Gloss front page is an additional charge\ngloss_cost = GLOSS_RATE if is_gloss else 0\n\n# Per-copy pricing\nper_copy_total = (\n    binding_cost +\n    gloss_cost +\n    color_cost +\n    mono_cost\n)\n\n# Order pricing\nlate_fee = LATE_NIGHT_FEE if is_late_night else 0\n\nsubtotal = per_copy_total * copies\norder_total = subtotal + late_fee\n\n# Add calculated fields without removing originals\no[\"binding_cost\"] = round(binding_cost, 2)\no[\"color_rate\"] = color_rate\no[\"mono_rate\"] = mono_rate\no[\"color_pages\"] = color_pages\no[\"mono_pages\"] = mono_pages\no[\"color_cost_per_copy\"] = round(color_cost, 2)\no[\"mono_cost_per_copy\"] = round(mono_cost, 2)\no[\"gloss_cost_per_copy\"] = round(gloss_cost, 2)\no[\"per_copy_total\"] = round(per_copy_total, 2)\no[\"copies\"] = copies\no[\"subtotal\"] = round(subtotal, 2)\no[\"late_fee\"] = round(late_fee, 2)\no[\"order_total\"] = round(order_total, 2)\n\nreturn {\"json\": o}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1530,7 +1530,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        352,
+        336,
         432
       ],
       "id": "d35d00ac-9012-4368-abc8-04ca1579f6be",
@@ -1858,11 +1858,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4e766bc0-646c-428c-bad6-f6626e2f71ba",
+  "versionId": "be8d7689-8e09-4c04-a35e-4fae828c1c00",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
