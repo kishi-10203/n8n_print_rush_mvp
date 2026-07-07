@@ -1,0 +1,240 @@
+{
+  "name": "drive_cleaner",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 18
+            },
+            {}
+          ]
+        },
+        "event": "pagedUpdatedInDatabase",
+        "databaseId": {
+          "__rl": true,
+          "value": "2d3ceca9-c821-80c9-94d6-f0ff053c1109",
+          "mode": "list",
+          "cachedResultName": "PrintRush Orders",
+          "cachedResultUrl": "https://app.notion.com/p/2d3ceca9c82180c994d6f0ff053c1109"
+        }
+      },
+      "type": "n8n-nodes-base.notionTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8bd74df5-9fd5-440d-ae70-137e9f98347f",
+      "name": "fetch_updated_pages",
+      "credentials": {
+        "notionApi": {
+          "id": "UPwOntWZm2dBXNrp",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2d992181-0fee-4b78-a97b-a40ebbb7ebc3",
+              "leftValue": "={{ $json.order_status }}",
+              "rightValue": "CANCELLED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f2ad3a03-1bb8-480a-beb5-5f9881657ce3",
+              "leftValue": "={{ $json.order_status }}",
+              "rightValue": "DELIVERED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "48ff5c35-74c7-4f12-a42a-baf52d5ce03d",
+              "leftValue": "={{ $json.order_status }}",
+              "rightValue": "DELIVERY ABANDONED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "9f2d6741-4c2a-4d36-a393-a12456ee13db",
+              "leftValue": "={{ $json.order_status }}",
+              "rightValue": "PDF ISSUE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0c639555-dd67-49ea-805b-03012bc714c7",
+      "name": "filter_by_order_status"
+    },
+    {
+      "parameters": {
+        "content": "## workflow explanation\n\nMoves the pdf files to trash if the order is in the following state's in notion\n* DELIVERED \n* DELIVERY ABANDONED\n* CANCELLED \n* PDF ISSUE\n\npolled once in a day @ 6PM",
+        "height": 240,
+        "width": 512,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "e17356d8-8d70-42cd-b36f-6b0ff6a0f977",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.drive_pdf_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        640,
+        -16
+      ],
+      "id": "eebf98fc-1641-420d-badc-17d455f29a98",
+      "name": "delete_pdf_by_file_id",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5vR3sLEunrplw9ZL",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c916a801-4477-4917-a96b-1cd61d826de0",
+              "name": "order_id",
+              "value": "={{ $json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "63810b05-e009-41b2-8b69-0f12aa0e18dd",
+              "name": "notion_page_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "625d43eb-fe95-4a18-a09b-becda8d14261",
+              "name": "order_status",
+              "value": "={{ $json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "74aad4e1-4335-46a6-af4e-a047e925ea2f",
+              "name": "drive_pdf_id",
+              "value": "={{\n  $json.pdf_file_url.match(/(?:id=|\\/d\\/)([A-Za-z0-9_-]+)/)?.[1] ?? ''\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "97a5e187-c6db-4817-983b-fca5613dd539",
+      "name": "extract_file_data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "fetch_updated_pages": {
+      "main": [
+        [
+          {
+            "node": "filter_by_order_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter_by_order_status": {
+      "main": [
+        [
+          {
+            "node": "extract_file_data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "extract_file_data": {
+      "main": [
+        [
+          {
+            "node": "delete_pdf_by_file_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "86b24dee-4560-46aa-bf9b-c3adae3048ff",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
+  },
+  "id": "yfl09yhXCMPaAAjL",
+  "tags": [
+    {
+      "name": "under_dev",
+      "id": "L7dbshieBWVsG78X",
+      "createdAt": "2026-07-07T06:47:57.551Z",
+      "updatedAt": "2026-07-07T06:47:57.551Z"
+    }
+  ]
+}
