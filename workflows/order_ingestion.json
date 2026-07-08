@@ -15,10 +15,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -2912,
-        192
+        -3136,
+        208
       ],
-      "id": "1a6dd91f-b8be-4af4-b8df-0b162317c842",
+      "id": "d5c93b71-0a13-4636-b262-e79fd3f8b75f",
       "name": "Schedule Trigger"
     },
     {
@@ -112,7 +112,7 @@
             {
               "id": "9bfcb6bf-2f0b-405d-8bd2-27caa222d5ff",
               "name": "color_pages_count_per_copy",
-              "value": "={{ \n(() => {\n\n  const val = $json[\"Color Pages\"];\n\n  // Handle empty/null/0\n  if (\n    val === null ||\n    val === undefined ||\n    val.toString().trim() === \"\" ||\n    val.toString().trim() === \"0\"\n  ) {\n    return 0;\n  }\n\n  return val\n    .toString()\n    .split(\",\")\n    .map(v => v.trim())\n    .filter(v => v !== \"\")\n    .length;\n\n})()\n}}",
+              "value": "={{\n(() => {\n\n  const val = $json[\"Color Pages\"];\n\n  // Handle empty/null/0\n  if (\n    val === null ||\n    val === undefined ||\n    val.toString().trim() === \"\" ||\n    val.toString().trim() === \"0\"\n  ) {\n    return 0;\n  }\n\n  return val\n    .toString()\n    .split(\",\")\n    .map(v => v.trim())\n    .filter(v => v !== \"\")\n    .reduce((total, page) => {\n\n      // Handle page ranges like 1-4, 6-9\n      if (page.includes(\"-\")) {\n        const range = page.split(\"-\").map(v => Number(v.trim()));\n\n        if (\n          range.length === 2 &&\n          !isNaN(range[0]) &&\n          !isNaN(range[1]) &&\n          range[1] >= range[0]\n        ) {\n          return total + (range[1] - range[0] + 1);\n        }\n      }\n\n      // Handle single page numbers like 12, 14, 17\n      return total + 1;\n\n    }, 0);\n\n})()\n}}",
               "type": "number"
             },
             {
@@ -170,10 +170,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2016,
-        288
+        -2240,
+        304
       ],
-      "id": "c8b5c71c-07d5-44a2-a4de-31600dd75c69",
+      "id": "424dbbfa-13a7-49b3-9570-6741821dc648",
       "name": "mapping fields to execution terminology"
     },
     {
@@ -197,14 +197,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -2688,
-        192
+        -2912,
+        208
       ],
-      "id": "db948877-627d-496b-9d1a-9e4e9435ace9",
+      "id": "69b4b7cd-8c54-4ac4-a7ae-5faf119da4bc",
       "name": "fetch last_batch_markers",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -217,10 +217,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1120,
-        192
+        -1344,
+        208
       ],
-      "id": "55eccccb-ec5c-4757-80da-b095d72b6df6",
+      "id": "748fec59-b8ab-49bc-a935-df6c1b568c12",
       "name": "order_business_rules"
     },
     {
@@ -232,10 +232,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        176
+        -448,
+        192
       ],
-      "id": "d0b639a5-b302-4272-823e-507ea4734f10",
+      "id": "448d6bad-408d-487c-b79b-4b446c78b976",
       "name": "order_pricing",
       "executeOnce": false
     },
@@ -247,10 +247,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1568,
-        192
+        -1792,
+        208
       ],
-      "id": "3d827914-8bb3-4628-b74c-1e591e2d24ad",
+      "id": "637dd1ed-b8d8-4c6e-8cde-b478ec63a371",
       "name": "assign_order_id",
       "executeOnce": false
     },
@@ -261,10 +261,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        -16
+        0,
+        0
       ],
-      "id": "c6be7096-93d2-4fc9-a768-d4456aa2c1d9",
+      "id": "4ca68441-de79-4ae6-96da-1885e1a40fbc",
       "name": "format_updated_counters"
     },
     {
@@ -275,10 +275,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2016,
-        96
+        -2240,
+        112
       ],
-      "id": "cdf5c30b-5b69-4eb6-b902-e8ab924a1f9f",
+      "id": "5dfd40a8-36f1-4efe-99ec-067d1226a6bf",
       "name": "format_order_counters"
     },
     {
@@ -420,16 +420,16 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        0,
-        176
+        -224,
+        192
       ],
-      "id": "ef73247b-6a9f-4146-9327-fabc0ec2119d",
+      "id": "a1c38bca-c382-412e-ad73-898595c017e5",
       "name": "create_orders_notion_page",
       "executeOnce": false,
       "alwaysOutputData": false,
       "credentials": {
         "notionApi": {
-          "id": "4qUYKN5kjAqccUAm",
+          "id": "UPwOntWZm2dBXNrp",
           "name": "Notion account"
         }
       }
@@ -509,14 +509,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        448,
-        -16
+        224,
+        0
       ],
-      "id": "44e7bd85-34bc-4d4f-9dfd-9f30d312b488",
+      "id": "310a6edc-792b-4ddc-b453-894e3def5a9f",
       "name": "update_order_counters",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -607,14 +607,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        448,
-        176
+        224,
+        192
       ],
-      "id": "3d37b6bf-b5c7-4539-93bd-cc1afc1fe9af",
+      "id": "0e23fbe3-8792-4010-adeb-5d2bb7c59ca0",
       "name": "update_batch_markers",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -977,14 +977,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        896,
-        176
+        672,
+        192
       ],
-      "id": "d758e938-c09f-4784-8532-2941092cb97b",
+      "id": "1b0d6af3-b998-4924-803e-2e5a0b3072b2",
       "name": "save_processed_orders",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -1010,14 +1010,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -2464,
-        96
+        -2688,
+        112
       ],
-      "id": "550e65a5-c7ad-411f-8590-3badb5c03c44",
+      "id": "732dd03b-0582-4258-ada7-f42ef199f5f2",
       "name": "fetch_order_counters",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -1030,10 +1030,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -1792,
-        192
+        -2016,
+        208
       ],
-      "id": "d5deb9e3-3771-4067-8358-0f564722d9a1",
+      "id": "c75fb898-d6ed-4f7e-a2b7-414607d70a3f",
       "name": "wait_and_merge"
     },
     {
@@ -1044,10 +1044,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1344,
-        192
+        -1568,
+        208
       ],
-      "id": "6c1a7edf-4521-4f5a-be71-55290750b412",
+      "id": "7d10b515-2f3a-4bf9-b185-e1fc8248863e",
       "name": "flatten_order_details"
     },
     {
@@ -1063,15 +1063,15 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -896,
-        192
+        -1120,
+        208
       ],
-      "id": "590ee9a4-1b39-4be7-b63c-7ff5c10f6fe6",
+      "id": "bd8a59cf-e720-4f9e-9f3c-1f2de2bb7642",
       "name": "download_pdf",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "VknsnB0cmGuiyYi7",
-          "name": "Google Drive account 2"
+          "id": "5vR3sLEunrplw9ZL",
+          "name": "Google Drive account"
         }
       }
     },
@@ -1083,10 +1083,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -672,
-        192
+        -896,
+        208
       ],
-      "id": "9d9efa2b-3e29-40c1-a46e-76ff24e725b3",
+      "id": "890e726e-5d9a-4df3-9747-9694dc0b2875",
       "name": "extract_pdf",
       "onError": "continueErrorOutput"
     },
@@ -1287,10 +1287,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -448,
-        176
+        -672,
+        192
       ],
-      "id": "ae5e8141-61dd-424e-abe2-a266541c9baa",
+      "id": "530fce20-74ab-4e0a-94ff-8ffa76738ac0",
       "name": "map_order_details"
     },
     {
@@ -1302,10 +1302,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        672,
-        160
+        448,
+        176
       ],
-      "id": "ee6d1da8-9504-48a7-a51a-7ad8a43b6ae8",
+      "id": "8f92a212-2d76-48a5-b215-6f2026a67a51",
       "name": "wait_and_merge_2"
     },
     {
@@ -1315,10 +1315,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        176
+        0,
+        192
       ],
-      "id": "be15a097-cad5-42f1-ac30-8ea1d9adef78",
+      "id": "6cf7e5fe-0e21-402d-a7ff-f3eb3b6b869a",
       "name": "format_updated_batch_counters"
     },
     {
@@ -1530,10 +1530,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        336,
-        432
+        112,
+        448
       ],
-      "id": "d35d00ac-9012-4368-abc8-04ca1579f6be",
+      "id": "38d8c2a4-f38b-45de-8bd4-78e004161957",
       "name": "processed_orders_formatting"
     },
     {
@@ -1544,10 +1544,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2240,
-        288
+        -2464,
+        304
       ],
-      "id": "a16ed8c0-4a64-43a6-b8d4-8f1a08e63795",
+      "id": "a085d219-db83-4ff3-90f9-bde419c8f7f5",
       "name": "filter_new_orders"
     },
     {
@@ -1577,15 +1577,15 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -2464,
-        288
+        -2688,
+        304
       ],
-      "id": "29a1a6c5-3a8b-46eb-b8c1-ec655977e7b6",
+      "id": "42b9243b-3bf6-44b0-9c84-aaefd7971dc2",
       "name": "fetch_orders",
       "executeOnce": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "G8poEVpbAReMy0WI",
+          "id": "k8H4bfspKx3CHaJw",
           "name": "Google Sheets account"
         }
       }
@@ -1858,15 +1858,22 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "be8d7689-8e09-4c04-a35e-4fae828c1c00",
+  "versionId": "cffd6893-f126-474d-b9f8-31786858ad92",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "781c4a776d8642e9e68ce52941b594819bbc42369d5e2b08c63f81f77524ce58"
   },
-  "id": "qt2qSpNbyq0RHhVN",
-  "tags": []
+  "id": "Llyw1AwTBOkE3Dg6",
+  "tags": [
+    {
+      "createdAt": "2026-07-07T06:48:11.885Z",
+      "updatedAt": "2026-07-07T06:48:11.885Z",
+      "id": "0sXUQdVkMzWg8wHk",
+      "name": "stable"
+    }
+  ]
 }
